@@ -2,6 +2,7 @@
 import cv2
 import numpy as np
 from config.settings import Settings
+from vision.mask_utils import create_mango_hsv_mask
 
 
 class FrameExtractor:
@@ -132,23 +133,8 @@ class FrameExtractor:
         return motion_bin
     
     def _create_hsv_mask(self, roi):
-        """Create HSV color mask for mango detection"""
-        hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
-        
-        mask_yellow = cv2.inRange(hsv,
-                                  np.array(self.settings.HSV_YELLOW_LOWER),
-                                  np.array(self.settings.HSV_YELLOW_UPPER))
-        mask_green = cv2.inRange(hsv,
-                                np.array(self.settings.HSV_GREEN_LOWER),
-                                np.array(self.settings.HSV_GREEN_UPPER))
-        mask_black = cv2.inRange(hsv,
-                                np.array(self.settings.HSV_BLACK_LOWER),
-                                np.array(self.settings.HSV_BLACK_UPPER))
-        
-        combined_mask = cv2.bitwise_or(mask_yellow, mask_green)
-        combined_mask = cv2.bitwise_or(combined_mask, mask_black)
-        
-        return combined_mask
+        """Create HSV color mask for mango detection (delegates to shared utility)"""
+        return create_mango_hsv_mask(roi, self.settings)
     
     def _apply_morphological_cleanup(self, mask):
         """Apply morphological operations to clean up mask"""

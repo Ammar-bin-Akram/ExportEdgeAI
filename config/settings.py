@@ -11,7 +11,7 @@ class Settings:
     """Centralized configuration settings"""
     
     # Video settings
-    VIDEO_SOURCE = str(PROJECT_ROOT / "live_recording3.mp4")
+    VIDEO_SOURCE = str(PROJECT_ROOT / "live_recording2.mp4")
     # VIDEO_SOURCE = "rtsp://admin:admin123@192.168.1.108:554/cam/realmonitor?channel=1&subtype=1"
     
     # ROI coordinates (x1, y1, x2, y2)
@@ -45,7 +45,7 @@ class Settings:
     SEGMENTATION_THRESHOLD = 0.5
     
     # Output settings
-    OUTPUT_DIR = str(PROJECT_ROOT / "relevant_frames3")
+    OUTPUT_DIR = str(PROJECT_ROOT / "relevant_frames2")
     SAVE_INTERMEDIATE_STEPS = True
     DISPLAY_DEBUG = True
 

@@ -16,11 +16,17 @@ with st.spinner("Loading dependencies..."):
     import numpy as np
     import os
     import tempfile
+    from datetime import datetime
 
     # Import from new modular structure
     from config.settings import Settings
     from fruits.mango import MangoPipeline
     from vision import ROIExtractor, MotionDetector
+    from vision.defect_detector import MangoDefectDetector
+    from vision.mask_utils import create_mango_hsv_mask
+    from vision.export_advisor import ExportAdvisor
+    from vision.report_generator import ReportGenerator
+    from vision.inspection_logger import log_inspection
     
     # Backward compatibility imports
     import config
@@ -50,6 +56,12 @@ if 'segmentation_model_loaded' not in st.session_state:
     st.session_state.segmentation_model_loaded = False
 if 'segmentation_model' not in st.session_state:
     st.session_state.segmentation_model = None
+if 'defect_detector' not in st.session_state:
+    st.session_state.defect_detector = MangoDefectDetector()
+if 'export_advisor' not in st.session_state:
+    st.session_state.export_advisor = ExportAdvisor()  # RAG loaded lazily on first query
+if 'report_generator' not in st.session_state:
+    st.session_state.report_generator = ReportGenerator()
 if 'processing_complete' not in st.session_state:
     st.session_state.processing_complete = False
 if 'results' not in st.session_state:
@@ -84,10 +96,16 @@ if not st.session_state.pipeline_loaded:
     try:
         st.session_state.pipeline = initialize_pipeline()
         st.session_state.pipeline_loaded = True
-        # Set backward compatibility state
-        st.session_state.model = st.session_state.pipeline.classification_model
+        # Set backward compatibility state — predict_disease() expects a
+        # (interpreter, input_details, output_details) tuple, not the
+        # ClassificationModel wrapper, so unwrap it here.
+        clf = st.session_state.pipeline.classification_model
+        st.session_state.model = (clf.interpreter, clf.input_details, clf.output_details)
         st.session_state.model_loaded = True
-        st.session_state.segmentation_model = st.session_state.pipeline.segmentation_model
+        # segment_disease() expects the raw PyTorch model, not the
+        # SegmentationModel wrapper, so unwrap .model here.
+        seg = st.session_state.pipeline.segmentation_model
+        st.session_state.segmentation_model = seg.model if seg is not None else None
         st.session_state.segmentation_model_loaded = True
     except Exception as e:
         pass  # Will load on demand if this fails
@@ -155,7 +173,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                        (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             
             display_frame_rgb = cv2.cvtColor(display_frame, cv2.COLOR_BGR2RGB)
-            video_placeholder.image(display_frame_rgb, channels="RGB", use_container_width=True)
+            video_placeholder.image(display_frame_rgb, channels="RGB", width='stretch')
         
         # Motion detection logic (same as main pipeline)
         if not in_motion and motion_area > config.MOTION_AREA_THRESHOLD:
@@ -187,11 +205,23 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                     # Display original
                     roi_rgb = cv2.cvtColor(roi_crop, cv2.COLOR_BGR2RGB)
                     frame_placeholder.image(roi_rgb, caption="🥭 Detected Mango", 
-                                          use_container_width=True)
+                                          width='stretch')
                     
                     # Preprocess using main pipeline function
                     info_placeholder.info("⚙️ Preprocessing image...")
                     processed_image = preprocess_image(roi_crop)  # From preprocessing
+                    
+                    # Defect detection — compute HSV mask on raw ROI,
+                    # resize to 224×224, then run detector on preprocessed
+                    info_placeholder.info("🔎 Running defect detection...")
+                    hsv_mask = create_mango_hsv_mask(roi_crop)
+                    mask_224 = cv2.resize(hsv_mask, (224, 224),
+                                          interpolation=cv2.INTER_NEAREST)
+                    _, mask_224 = cv2.threshold(mask_224, 127, 255,
+                                                cv2.THRESH_BINARY)
+                    defect_result = st.session_state.defect_detector.detect_defects(
+                        processed_image, mask=mask_224
+                    )
                     
                     # Predict using main pipeline function
                     info_placeholder.info("🤖 Running classification...")
@@ -216,28 +246,49 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                         # Display segmented overlay
                         overlay_rgb = cv2.cvtColor(segmentation_result['overlay'], cv2.COLOR_BGR2RGB)
                         frame_placeholder.image(overlay_rgb, caption="🥭 Disease Segmentation", 
-                                              use_container_width=True)
+                                              width='stretch')
                         
-                        # Display results with segmentation info
+                        # Display results with segmentation + defect info
                         prediction_placeholder.success(
                             f"**Prediction:** {prediction['class_name']}\n\n"
                             f"**Confidence:** {prediction['confidence']:.2%}\n\n"
                             f"**Disease Area:** {segmentation_result['disease_percentage']:.2f}%\n\n"
-                            f"**Inference Time:** {prediction['inference_time']:.3f}s\n\n"
-                            f"**Segmentation Time:** {segmentation_result['segmentation_time']:.3f}s"
+                            f"**Surface Quality:** {defect_result.surface_quality_score:.0f}/100\n\n"
+                            f"**Export Impact:** {defect_result.export_grade_impact}\n\n"
+                            f"**Defects:** {defect_result.defect_count} "
+                            f"(dark: {defect_result.dark_spot_count}, brown: {defect_result.brown_spot_count})"
                         )
                     else:
                         # Display results without segmentation
                         prediction_placeholder.success(
                             f"**Prediction:** {prediction['class_name']}\n\n"
                             f"**Confidence:** {prediction['confidence']:.2%}\n\n"
-                            f"**Inference Time:** {prediction['inference_time']:.3f}s"
+                            f"**Surface Quality:** {defect_result.surface_quality_score:.0f}/100\n\n"
+                            f"**Export Impact:** {defect_result.export_grade_impact}\n\n"
+                            f"**Defects:** {defect_result.defect_count} "
+                            f"(dark: {defect_result.dark_spot_count}, brown: {defect_result.brown_spot_count})"
                         )
                     
                     # Show probabilities
                     with frame_col.expander("📊 All Class Probabilities"):
                         for class_name, prob in prediction['probabilities'].items():
                             st.progress(prob, text=f"{class_name}: {prob:.2%}")
+                    
+                    # Generate defect visualisation
+                    defect_vis = st.session_state.defect_detector.visualize_defects(
+                        processed_image, defect_result
+                    )
+                    
+                    # Show defect overlay in an expander
+                    with frame_col.expander("🔎 Defect Analysis"):
+                        vis_rgb = cv2.cvtColor(defect_vis, cv2.COLOR_BGR2RGB)
+                        st.image(vis_rgb, caption="Defect Overlay", width='stretch')
+                        st.write(f"**Dark spots:** {defect_result.dark_spot_count}")
+                        st.write(f"**Brown spots:** {defect_result.brown_spot_count}")
+                        st.write(f"**Defect area:** {defect_result.total_defect_percentage:.2f}%")
+                        st.write(f"**Colour uniformity:** {defect_result.color_uniformity_score:.0f}/100")
+                        st.write(f"**Surface quality:** {defect_result.surface_quality_score:.0f}/100")
+                        st.write(f"**Export impact:** {defect_result.export_grade_impact}")
                     
                     # Store result
                     result_data = {
@@ -246,7 +297,17 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                         'motion_area': best_area,
                         'prediction': prediction,
                         'original_roi': roi_crop,
-                        'processed_roi': processed_image
+                        'processed_roi': processed_image,
+                        'defect_analysis': {
+                            'defect_count': defect_result.defect_count,
+                            'dark_spot_count': defect_result.dark_spot_count,
+                            'brown_spot_count': defect_result.brown_spot_count,
+                            'total_defect_percentage': defect_result.total_defect_percentage,
+                            'color_uniformity_score': defect_result.color_uniformity_score,
+                            'surface_quality_score': defect_result.surface_quality_score,
+                            'export_grade_impact': defect_result.export_grade_impact,
+                            'defect_visualization': defect_vis,
+                        }
                     }
                     
                     if segmentation_result:
@@ -272,6 +333,18 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
         prediction = predict_disease(st.session_state.model, processed_image, 
                                     return_probabilities=True)
         
+        # Defect detection on edge-case frame
+        hsv_mask = create_mango_hsv_mask(roi_crop)
+        mask_224 = cv2.resize(hsv_mask, (224, 224),
+                              interpolation=cv2.INTER_NEAREST)
+        _, mask_224 = cv2.threshold(mask_224, 127, 255, cv2.THRESH_BINARY)
+        defect_result = st.session_state.defect_detector.detect_defects(
+            processed_image, mask=mask_224
+        )
+        defect_vis = st.session_state.defect_detector.visualize_defects(
+            processed_image, defect_result
+        )
+        
         result_data = {
             'frame_idx': best_idx,
             'timestamp_ms': best_time,
@@ -279,6 +352,16 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
             'prediction': prediction,
             'original_roi': roi_crop,
             'processed_roi': processed_image,
+            'defect_analysis': {
+                'defect_count': defect_result.defect_count,
+                'dark_spot_count': defect_result.dark_spot_count,
+                'brown_spot_count': defect_result.brown_spot_count,
+                'total_defect_percentage': defect_result.total_defect_percentage,
+                'color_uniformity_score': defect_result.color_uniformity_score,
+                'surface_quality_score': defect_result.surface_quality_score,
+                'export_grade_impact': defect_result.export_grade_impact,
+                'defect_visualization': defect_vis,
+            },
             'segmentation': None
         }
         
@@ -369,7 +452,7 @@ def main_page():
         st.markdown("---")
         
         # Start button
-        if st.button("🚀 Start Detection", type="primary", use_container_width=True):
+        if st.button("🚀 Start Detection", type="primary", width='stretch'):
             if video_path and os.path.exists(video_path):
                 load_model()  # Load model using main pipeline function
                 st.session_state.started = True
@@ -416,6 +499,12 @@ def processing_page():
         
         st.session_state.results = results
         st.session_state.processing_complete = True
+
+    # ── Always render results after processing is done ────────────────────
+    # This block runs on every rerun (including button clicks) so that
+    # widgets like the RAG recommendation button remain interactive.
+    if st.session_state.processing_complete:
+        results = st.session_state.results
         
         # Show summary
         st.markdown("---")
@@ -425,62 +514,130 @@ def processing_page():
             # Create summary table
             summary_data = []
             for idx, result in enumerate(results, 1):
+                da = result.get('defect_analysis', {})
                 summary_data.append({
                     'Detection #': idx,
                     'Frame': result['frame_idx'],
                     'Time (ms)': result['timestamp_ms'],
                     'Prediction': result['prediction']['class_name'],
-                    'Confidence': f"{result['prediction']['confidence']:.2%}"
+                    'Confidence': f"{result['prediction']['confidence']:.2%}",
+                    'Quality': f"{da.get('surface_quality_score', 0):.0f}/100",
+                    'Defects': da.get('defect_count', 0),
+                    'Export Impact': da.get('export_grade_impact', 'N/A'),
                 })
             
-            st.dataframe(summary_data, use_container_width=True)
-            
-            # Show detailed results
+            st.dataframe(summary_data, width='stretch')
+
+            # ── Per-mango details & recommendations ───────────────
             st.markdown("---")
-            st.subheader("🔍 Detailed Results")
-            
+            st.subheader("🔍 Inspection Details")
+
             for idx, result in enumerate(results, 1):
                 with st.expander(f"Detection #{idx} - {result['prediction']['class_name']}"):
-                    # Show images - 3 columns if segmentation, 2 otherwise
-                    if result['segmentation']:
-                        col1, col2, col3 = st.columns(3)
-                        
-                        with col1:
-                            st.image(cv2.cvtColor(result['original_roi'], cv2.COLOR_BGR2RGB),
-                                   caption="Original", use_container_width=True)
-                        
-                        with col2:
-                            st.image(cv2.cvtColor(result['processed_roi'], cv2.COLOR_BGR2RGB),
-                                   caption="Preprocessed", use_container_width=True)
-                        
-                        with col3:
-                            st.image(cv2.cvtColor(result['segmentation']['overlay'], cv2.COLOR_BGR2RGB),
-                                   caption="Segmented", use_container_width=True)
-                    else:
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            st.image(cv2.cvtColor(result['original_roi'], cv2.COLOR_BGR2RGB),
-                                   caption="Original", use_container_width=True)
-                        
-                        with col2:
-                            st.image(cv2.cvtColor(result['processed_roi'], cv2.COLOR_BGR2RGB),
-                                   caption="Preprocessed", use_container_width=True)
-                    
-                    st.write(f"**Frame:** {result['frame_idx']}")
-                    st.write(f"**Timestamp:** {result['timestamp_ms']} ms")
-                    st.write(f"**Motion Area:** {result['motion_area']:.0f} pixels")
-                    st.write(f"**Prediction:** {result['prediction']['class_name']}")
-                    st.write(f"**Confidence:** {result['prediction']['confidence']:.2%}")
-                    
-                    # Show segmentation info if available
-                    if result['segmentation']:
-                        st.write(f"**Disease Area:** {result['segmentation']['disease_percentage']:.2f}%")
-                        st.write(f"**Segmentation Time:** {result['segmentation']['segmentation_time']:.3f}s")
-                    
-                    st.write("**Probability Distribution:**")
-                    for class_name, prob in result['prediction']['probabilities'].items():
-                        st.progress(prob, text=f"{class_name}: {prob:.2%}")
+                    # Defect analysis metrics
+                    da = result.get('defect_analysis', {})
+                    if da:
+                        st.markdown("**🔎 Defect Analysis**")
+                        d_col1, d_col2, d_col3 = st.columns(3)
+                        with d_col1:
+                            st.metric("Surface Quality", f"{da.get('surface_quality_score', 0):.0f}/100")
+                        with d_col2:
+                            st.metric("Colour Uniformity", f"{da.get('color_uniformity_score', 0):.0f}/100")
+                        with d_col3:
+                            st.metric("Export Impact", da.get('export_grade_impact', 'N/A'))
+                        st.write(f"**Dark spots:** {da.get('dark_spot_count', 0)} | "
+                                 f"**Brown spots:** {da.get('brown_spot_count', 0)} | "
+                                 f"**Defect area:** {da.get('total_defect_percentage', 0):.2f}%")
+
+                    # Segmentation disease %
+                    has_seg = result.get('segmentation') is not None
+                    if has_seg and result['segmentation']['disease_percentage'] > 0:
+                        st.write(f"**Disease coverage:** {result['segmentation']['disease_percentage']:.2f}%")
+
+                    # ── Export country recommendation via RAG ──────────────
+                    st.markdown("---")
+                    rec_key = f"rec_{idx}"
+                    if st.button("🌍 Get Export Country Recommendation",
+                                 key=f"btn_rec_{idx}"):
+                        with st.spinner("Querying export regulations..."):
+                            try:
+                                seg_pct = (
+                                    result['segmentation']['disease_percentage']
+                                    if result.get('segmentation') else 0.0
+                                )
+                                metadata = st.session_state.export_advisor.build_metadata(
+                                    defect_analysis=result.get('defect_analysis', {}),
+                                    disease_percentage=seg_pct,
+                                )
+                                rec = st.session_state.export_advisor.get_recommendation(metadata)
+                                st.session_state[rec_key] = rec
+                            except Exception as e:
+                                st.session_state[rec_key] = {
+                                    "status": "error",
+                                    "answer": f"Error: {e}",
+                                    "sources": []
+                                }
+
+                    if rec_key in st.session_state:
+                        rec = st.session_state[rec_key]
+                        if rec.get('status') == 'success':
+                            st.markdown("**🌍 Export Recommendation:**")
+                            st.markdown(rec['answer'])
+                            if rec.get('sources'):
+                                with st.expander("📚 Regulatory Sources"):
+                                    for s in rec['sources']:
+                                        st.write(f"**{s['index']}.** {s['source']} — {s['section']}")
+                                        st.caption(s['content_preview'])
+                        else:
+                            st.error(rec.get('answer', 'Unknown error'))
+
+            # ── PDF Report (shown after recommendations area) ─────
+            st.markdown("---")
+            dl_col1, dl_col2 = st.columns([1, 3])
+            with dl_col1:
+                generate_report = st.button("📄 Generate PDF Report", type="primary")
+            if generate_report:
+                with st.spinner("Generating PDF report..."):
+                    try:
+                        # Collect any recommendations that have been fetched
+                        recs = {}
+                        for i in range(1, len(results) + 1):
+                            rk = f"rec_{i}"
+                            if rk in st.session_state:
+                                recs[i] = st.session_state[rk]
+                        video_name = os.path.basename(
+                            st.session_state.get("video_path", "")
+                        )
+                        pdf_bytes = st.session_state.report_generator.generate(
+                            results,
+                            recommendations=recs,
+                            video_name=video_name,
+                        )
+                        st.session_state["report_pdf"] = pdf_bytes
+                        st.session_state["report_name"] = (
+                            f"mango_inspection_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                        )
+                        # Auto-log inspection details to text file
+                        try:
+                            log_path = log_inspection(
+                                results=results,
+                                recommendations=recs,
+                                video_name=video_name,
+                            )
+                            st.toast(f"Inspection logged to {log_path.name}")
+                        except Exception as log_err:
+                            st.warning(f"Logging failed: {log_err}")
+                    except Exception as e:
+                        st.error(f"Failed to generate report: {e}")
+
+            if "report_pdf" in st.session_state:
+                with dl_col2:
+                    st.download_button(
+                        label="⬇️ Download PDF Report",
+                        data=st.session_state["report_pdf"],
+                        file_name=st.session_state.get("report_name", "mango_report.pdf"),
+                        mime="application/pdf",
+                    )
         else:
             st.warning("No mangoes detected in the video.")
 

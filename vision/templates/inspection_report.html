@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mango Inspection Report</title>
+<style>
+  /* ── Page margins (xhtml2pdf uses @page) ──────────────────── */
+  @page {
+    size: A4;
+    margin: 10mm 12mm 10mm 12mm;
+  }
+
+  /* ── Reset & Base ─────────────────────────────────────────── */
+  body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    color: #1e293b;
+    line-height: 1.4;
+  }
+
+  /* ── Page wrapper ─────────────────────────────────────────── */
+  .page {
+    padding: 0;
+  }
+
+  /* ── Header (table-based for xhtml2pdf) ───────────────────── */
+  .header {
+    border-bottom: 2px solid #f59e0b;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+  }
+  table.header-tbl {
+    width: 100%;
+    border: none;
+  }
+  table.header-tbl td {
+    border: none;
+    padding: 0;
+    vertical-align: bottom;
+  }
+  .header h1 {
+    font-size: 18pt;
+    color: #b45309;
+  }
+  .header .meta {
+    text-align: right;
+    font-size: 9pt;
+    color: #64748b;
+  }
+
+  /* ── Section headings ─────────────────────────────────────── */
+  h2 {
+    font-size: 13pt;
+    color: #b45309;
+    border-bottom: 1px solid #fcd34d;
+    padding-bottom: 2px;
+    margin: 10px 0 6px 0;
+  }
+  h3 {
+    font-size: 11pt;
+    color: #92400e;
+    margin: 8px 0 4px 0;
+  }
+
+  /* ── Grade badge ──────────────────────────────────────────── */
+  .grade-badge {
+    display: inline;
+    padding: 2px 10px;
+    font-weight: 700;
+    font-size: 11pt;
+    color: #fff;
+  }
+  .grade-A { background: #16a34a; }
+  .grade-B { background: #eab308; color: #1e293b; }
+  .grade-C { background: #dc2626; }
+
+  /* ── Side-by-side images (table-based for xhtml2pdf) ──────── */
+  table.image-pair td {
+    text-align: center;
+    vertical-align: top;
+    padding: 2px;
+  }
+  .caption {
+    font-size: 8pt;
+    color: #64748b;
+  }
+
+  /* ── Metrics table ────────────────────────────────────────── */
+  table.metrics {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+  }
+  table.metrics th,
+  table.metrics td {
+    border: 1px solid #e2e8f0;
+    padding: 6px 10px;
+    text-align: left;
+    font-size: 10pt;
+  }
+  table.metrics th {
+    background: #fef3c7;
+    font-weight: 600;
+    width: 42%;
+  }
+  table.metrics td {
+    background: #fffbeb;
+  }
+
+  /* ── Recommendation cards ─────────────────────────────────── */
+  .rec-section {
+    margin: 8px 0 4px 0;
+  }
+  .rec-section h4 {
+    font-size: 10.5pt;
+    color: #1e293b;
+    margin-bottom: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  .rec-section h4.rec-good { background: #dcfce7; color: #166534; }
+  .rec-section h4.rec-bad  { background: #fee2e2; color: #991b1b; }
+  .rec-section h4.rec-action { background: #dbeafe; color: #1e40af; }
+  .rec-section h4.rec-cond { background: #fef9c3; color: #854d0e; }
+
+  .rec-section ul, .rec-section ol {
+    padding-left: 22px;
+    font-size: 10pt;
+    margin: 2px 0 6px 0;
+  }
+  .rec-section li {
+    margin-bottom: 2px;
+  }
+
+  .recommendation-box.error {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 10px 0;
+    font-size: 10pt;
+  }
+
+  /* ── Sources ──────────────────────────────────────────────── */
+  .sources {
+    margin-top: 6px;
+  }
+  .sources ol {
+    padding-left: 18px;
+    font-size: 8.5pt;
+    color: #64748b;
+  }
+  .sources li { margin-bottom: 2px; }
+  .sources .src-name { font-weight: 600; }
+
+  /* ── Footer ───────────────────────────────────────────────── */
+  .footer {
+    margin-top: 30px;
+    padding-top: 10px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 8pt;
+    color: #94a3b8;
+    text-align: center;
+  }
+
+  /* ── Summary table (batch) ────────────────────────────────── */
+  table.summary {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 9.5pt;
+  }
+  table.summary th,
+  table.summary td {
+    border: 1px solid #e2e8f0;
+    padding: 5px 8px;
+    text-align: center;
+  }
+  table.summary th {
+    background: #fef3c7;
+    font-weight: 600;
+  }
+  table.summary tr:nth-child(even) td {
+    background: #fffbeb;
+  }
+
+  /* ── Page break helper ──────────────────────────────────── */
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ═══════════ HEADER ═══════════ -->
+  <div class="header">
+    <table class="header-tbl"><tr>
+      <td><h1>&#x1F96D; Mango Inspection Report</h1></td>
+      <td class="meta">
+        <div><strong>Date:</strong> {{ report_date }}</div>
+        <div><strong>Mangoes inspected:</strong> {{ results | length }}</div>
+        {% if video_name %}
+        <div><strong>Source:</strong> {{ video_name }}</div>
+        {% endif %}
+      </td>
+    </tr></table>
+  </div>
+
+  <!-- ═══════════ BATCH SUMMARY TABLE ═══════════ -->
+  {% if results | length > 1 %}
+  <h2>Summary</h2>
+  <table class="summary">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Detected Disease</th>
+        <th>Surface Quality</th>
+        <th>Defect Area</th>
+        <th>Disease Coverage</th>
+        <th>Export Grade</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in results %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ r.prediction_name }}</td>
+        <td>{{ "%.0f" | format(r.defect_analysis.surface_quality_score) }}/100</td>
+        <td>{{ "%.2f" | format(r.defect_analysis.total_defect_percentage) }}%</td>
+        <td>{% if r.disease_pct is not none %}{{ "%.2f" | format(r.disease_pct) }}%{% else %}&mdash;{% endif %}</td>
+        <td>
+          <span class="grade-badge grade-{{ r.grade }}">{{ r.grade }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <!-- ═══════════ PER-MANGO SECTIONS ═══════════ -->
+  {% for r in results %}
+  {% if not loop.first %}<div class="page-break"></div>{% endif %}
+
+  <h2>
+    Mango #{{ loop.index }} &mdash; {{ r.prediction_name }}
+    <span class="grade-badge grade-{{ r.grade }}">Grade {{ r.grade }}</span>
+  </h2>
+
+  <!-- Side-by-side images: Original + Segmentation -->
+  <table width="100%" cellspacing="4"><tr>
+    {% if r.images.original %}
+    <td width="50%" align="center" valign="top">
+      <img src="data:image/png;base64,{{ r.images.original }}" width="200" alt="Original"><br>
+      <span class="caption">Original Image</span>
+    </td>
+    {% endif %}
+    {% if r.images.segmentation %}
+    <td width="50%" align="center" valign="top">
+      <img src="data:image/png;base64,{{ r.images.segmentation }}" width="200" alt="Segmentation"><br>
+      <span class="caption">Disease Segmentation Overlay</span>
+    </td>
+    {% elif r.images.original %}
+    <td width="50%" align="center" valign="top" style="opacity:0.3;">
+      <img src="data:image/png;base64,{{ r.images.original }}" width="200" alt="No segmentation"><br>
+      <span class="caption">Segmentation not available</span>
+    </td>
+    {% endif %}
+  </tr></table>
+
+  <!-- Inspection Metrics -->
+  <h3>Inspection Results</h3>
+  <table class="metrics" width="100%">
+    <tr><th>Detected Disease</th><td>{{ r.prediction_name }}</td></tr>
+    <tr><th>Surface Quality</th><td>{{ "%.0f" | format(r.defect_analysis.surface_quality_score) }} / 100</td></tr>
+    <tr><th>Colour Uniformity</th><td>{{ "%.0f" | format(r.defect_analysis.color_uniformity_score) }} / 100</td></tr>
+    <tr><th>Dark Spots</th><td>{{ r.defect_analysis.dark_spot_count }}</td></tr>
+    <tr><th>Brown Spots</th><td>{{ r.defect_analysis.brown_spot_count }}</td></tr>
+    <tr><th>Total Defect Area</th><td>{{ "%.2f" | format(r.defect_analysis.total_defect_percentage) }}%</td></tr>
+    {% if r.disease_pct is not none %}
+    <tr><th>Disease Coverage</th><td>{{ "%.2f" | format(r.disease_pct) }}%</td></tr>
+    {% endif %}
+    <tr><th>Export Grade Impact</th><td>{{ r.defect_analysis.export_grade_impact }}</td></tr>
+  </table>
+
+  <!-- Export recommendation -->
+  {% if r.recommendation %}
+  <h3>Export Recommendation</h3>
+
+  {% if r.recommendation.status == 'success' %}
+
+  {# ── Structured sections ── #}
+  {% if r.rec_parsed.recommended_countries %}
+  <div class="rec-section">
+    <h4 class="rec-good">&#x2705; Recommended Countries</h4>
+    <ul>
+      {% for item in r.rec_parsed.recommended_countries %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if r.rec_parsed.not_recommended %}
+  <div class="rec-section">
+    <h4 class="rec-bad">&#x274C; Not Recommended</h4>
+    <ul>
+      {% for item in r.rec_parsed.not_recommended %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if r.rec_parsed.actionable_steps %}
+  <div class="rec-section">
+    <h4 class="rec-action">&#x1F4CB; Actionable Steps</h4>
+    <ol>
+      {% for item in r.rec_parsed.actionable_steps %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ol>
+  </div>
+  {% endif %}
+
+  {% if r.rec_parsed.conditions %}
+  <div class="rec-section">
+    <h4 class="rec-cond">&#x26A0;&#xFE0F; Conditions Before Exporting</h4>
+    <ul>
+      {% for item in r.rec_parsed.conditions %}
+      <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+
+  {% if r.recommendation.sources %}
+  <div class="sources">
+    <strong>Sources:</strong>
+    <ol>
+      {% for s in r.recommendation.sources %}
+      <li><span class="src-name">{{ s.source }}</span> &mdash; {{ s.section }}</li>
+      {% endfor %}
+    </ol>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <div class="recommendation-box error">
+    {{ r.recommendation.answer }}
+  </div>
+  {% endif %}
+  {% endif %}
+
+  {% endfor %}
+
+  <!-- ═══════════ FOOTER ═══════════ -->
+  <div class="footer">
+    This report was generated automatically by the Mango Disease Detection System.
+    Results should be verified by a qualified inspector before making export decisions.
+    <br>Generated on {{ report_date }}.
+  </div>
+
+</div>
+</body>
+</html>

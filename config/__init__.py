@@ -1,4 +1,43 @@
 """Configuration module for the mango disease detection system"""
 from .settings import Settings
 
-__all__ = ['Settings']
+# Re-export module-level backward-compat variables so that
+# ``import config; config.MODEL_PATH`` keeps working.
+from .settings import (
+    VIDEO_SOURCE,
+    ROI_COORDS,
+    MOTION_AREA_THRESHOLD,
+    MOTION_END_FRAMES,
+    HSV_YELLOW_LOWER,
+    HSV_YELLOW_UPPER,
+    HSV_GREEN_LOWER,
+    HSV_GREEN_UPPER,
+    HSV_BLACK_LOWER,
+    HSV_BLACK_UPPER,
+    BG_HISTORY,
+    BG_VAR_THRESHOLD,
+    MODEL_PATH,
+    SEGMENTATION_MODEL_PATH,
+    INPUT_SHAPE,
+    NUM_CLASSES,
+    CLASS_NAMES,
+    ENABLE_SEGMENTATION,
+    SEGMENTATION_THRESHOLD,
+    OUTPUT_DIR,
+    SAVE_INTERMEDIATE_STEPS,
+    DISPLAY_DEBUG,
+)
+
+__all__ = [
+    'Settings',
+    'VIDEO_SOURCE', 'ROI_COORDS',
+    'MOTION_AREA_THRESHOLD', 'MOTION_END_FRAMES',
+    'HSV_YELLOW_LOWER', 'HSV_YELLOW_UPPER',
+    'HSV_GREEN_LOWER', 'HSV_GREEN_UPPER',
+    'HSV_BLACK_LOWER', 'HSV_BLACK_UPPER',
+    'BG_HISTORY', 'BG_VAR_THRESHOLD',
+    'MODEL_PATH', 'SEGMENTATION_MODEL_PATH',
+    'INPUT_SHAPE', 'NUM_CLASSES', 'CLASS_NAMES',
+    'ENABLE_SEGMENTATION', 'SEGMENTATION_THRESHOLD',
+    'OUTPUT_DIR', 'SAVE_INTERMEDIATE_STEPS', 'DISPLAY_DEBUG',
+]
