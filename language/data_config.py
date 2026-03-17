@@ -14,9 +14,9 @@ try:
     env_path = Path(__file__).parent.parent.parent / '.env'
     load_dotenv(env_path)
     if os.getenv('GOOGLE_API_KEY'):
-        logger.info("✅ Environment variables loaded successfully")
+        logger.info(" Environment variables loaded successfully")
     else:
-        logger.warning("⚠️  GOOGLE_API_KEY not found in .env file")
+        logger.warning("  GOOGLE_API_KEY not found in .env file")
 except ImportError:
     logger.warning("Warning: python-dotenv not installed. Install with: pip install python-dotenv")
     logger.warning("Falling back to system environment variables...")
@@ -47,15 +47,15 @@ SEARCH_TYPE = "similarity"
 RETRIEVAL_K = 5
 
 # LLM Configuration
-# Google AI Studio (Gemini) settings - loaded from .env file
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-LLM_MODEL_NAME = "gemini-2.5-flash-lite"  # or "gemini-1.5-pro"
+# LM Studio local server (OpenAI-compatible API)
+LM_STUDIO_BASE_URL = os.getenv('LM_STUDIO_BASE_URL', 'http://192.168.0.101:1234/v1')
+LLM_MODEL_NAME = "deepseek-r1-distill-qwen-1.5B"
 LLM_TEMPERATURE = 0.3
-LLM_MAX_TOKENS = 2048
+LLM_MAX_TOKENS = 1024
 
 # RAG Configuration
-RETRIEVAL_CONTEXT_LIMIT = 3  # Number of chunks to retrieve for context
-CONTEXT_WINDOW_SIZE = 4000  # Max characters for context
+RETRIEVAL_CONTEXT_LIMIT = 2  # Number of chunks to retrieve for context
+CONTEXT_WINDOW_SIZE = 2000  # Max characters for context (smaller for local models)
 
 # Test queries for retriever testing
 TEST_QUERIES = [

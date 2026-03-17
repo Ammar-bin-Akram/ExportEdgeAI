@@ -73,7 +73,7 @@ def process_single_pdf(pdf_path: str, output_path: str = None):
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(combined_markdown)
     
-    print(f"✓ Successfully processed! Text saved to: {output_path}")
+    print(f" Successfully processed! Text saved to: {output_path}")
     return str(output_path)
 
 

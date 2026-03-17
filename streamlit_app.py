@@ -5,7 +5,7 @@ import streamlit as st
 # Page configuration - MUST BE FIRST
 st.set_page_config(
     page_title="Mango Disease Detection",
-    page_icon="🥭",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -147,7 +147,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
     info_placeholder = frame_col.empty()
     prediction_placeholder = frame_col.empty()
     
-    status_placeholder.info(f"📹 Processing video: {total_frames} frames at {fps} FPS")
+    status_placeholder.info(f" Processing video: {total_frames} frames at {fps} FPS")
     
     while True:
         ret, frame = cap.read()
@@ -180,7 +180,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
             in_motion = True
             motion_buffer = []
             low_motion_counter = 0
-            status_placeholder.warning(f"🔍 Motion detected at frame {frame_idx}")
+            status_placeholder.warning(f" Motion detected at frame {frame_idx}")
         
         if in_motion:
             motion_buffer.append((frame.copy(), motion_area, frame_idx, timestamp_ms))
@@ -197,23 +197,23 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                         motion_buffer, key=lambda x: x[1]
                     )
                     
-                    status_placeholder.info(f"✅ Peak frame selected: Frame {best_idx}")
+                    status_placeholder.info(f" Peak frame selected: Frame {best_idx}")
                     
                     # Extract ROI
                     roi_crop = extract_roi(best_frame)  # From video_utils
                     
                     # Display original
                     roi_rgb = cv2.cvtColor(roi_crop, cv2.COLOR_BGR2RGB)
-                    frame_placeholder.image(roi_rgb, caption="🥭 Detected Mango", 
+                    frame_placeholder.image(roi_rgb, caption=" Detected Mango", 
                                           width='stretch')
                     
                     # Preprocess using main pipeline function
-                    info_placeholder.info("⚙️ Preprocessing image...")
+                    info_placeholder.info(" Preprocessing image...")
                     processed_image = preprocess_image(roi_crop)  # From preprocessing
                     
                     # Defect detection — compute HSV mask on raw ROI,
                     # resize to 224×224, then run detector on preprocessed
-                    info_placeholder.info("🔎 Running defect detection...")
+                    info_placeholder.info(" Running defect detection...")
                     hsv_mask = create_mango_hsv_mask(roi_crop)
                     mask_224 = cv2.resize(hsv_mask, (224, 224),
                                           interpolation=cv2.INTER_NEAREST)
@@ -224,7 +224,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                     )
                     
                     # Predict using main pipeline function
-                    info_placeholder.info("🤖 Running classification...")
+                    info_placeholder.info(" Running classification...")
                     prediction = predict_disease(  # From model_utils
                         st.session_state.model, 
                         processed_image, 
@@ -237,7 +237,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                     
                     segmentation_result = None
                     if should_segment:
-                        info_placeholder.info("🔬 Running segmentation...")
+                        info_placeholder.info(" Running segmentation...")
                         segmentation_result = segment_disease(
                             st.session_state.segmentation_model,
                             roi_crop
@@ -245,7 +245,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                         
                         # Display segmented overlay
                         overlay_rgb = cv2.cvtColor(segmentation_result['overlay'], cv2.COLOR_BGR2RGB)
-                        frame_placeholder.image(overlay_rgb, caption="🥭 Disease Segmentation", 
+                        frame_placeholder.image(overlay_rgb, caption=" Disease Segmentation", 
                                               width='stretch')
                         
                         # Display results with segmentation + defect info
@@ -270,7 +270,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                         )
                     
                     # Show probabilities
-                    with frame_col.expander("📊 All Class Probabilities"):
+                    with frame_col.expander(" All Class Probabilities"):
                         for class_name, prob in prediction['probabilities'].items():
                             st.progress(prob, text=f"{class_name}: {prob:.2%}")
                     
@@ -280,7 +280,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                     )
                     
                     # Show defect overlay in an expander
-                    with frame_col.expander("🔎 Defect Analysis"):
+                    with frame_col.expander(" Defect Analysis"):
                         vis_rgb = cv2.cvtColor(defect_vis, cv2.COLOR_BGR2RGB)
                         st.image(vis_rgb, caption="Defect Overlay", width='stretch')
                         st.write(f"**Dark spots:** {defect_result.dark_spot_count}")
@@ -382,14 +382,14 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
         detected_frames.append(result_data)
     
     cap.release()
-    status_placeholder.success(f"✅ Processing complete! Detected {len(detected_frames)} mangoes")
+    status_placeholder.success(f" Processing complete! Detected {len(detected_frames)} mangoes")
     
     return detected_frames
 
 
 def main_page():
     """Main landing page with start button"""
-    st.title("🥭 Mango Disease Detection System")
+    st.title(" Mango Disease Detection System")
     st.markdown("---")
     
     st.markdown("""
@@ -398,10 +398,10 @@ def main_page():
     This application uses AI to detect and classify mango diseases in real-time.
     
     **Features:**
-    - 🎥 Process video files or live camera feed
-    - 🔍 Automatic mango detection using motion tracking
-    - 🤖 AI-powered disease classification
-    - 📊 Real-time visualization and results
+    -  Process video files or live camera feed
+    -  Automatic mango detection using motion tracking
+    -  AI-powered disease classification
+    -  Real-time visualization and results
     
     **Detected Diseases:**
     - Alternaria
@@ -430,9 +430,9 @@ def main_page():
             if use_default:
                 video_path = config.VIDEO_SOURCE
                 if os.path.exists(video_path):
-                    st.success(f"✅ Using: {video_path}")
+                    st.success(f" Using: {video_path}")
                 else:
-                    st.error(f"❌ Default video not found: {video_path}")
+                    st.error(f" Default video not found: {video_path}")
                     video_path = None
             else:
                 uploaded_file = st.file_uploader("Upload a video file", 
@@ -442,17 +442,17 @@ def main_page():
                     tfile = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
                     tfile.write(uploaded_file.read())
                     video_path = tfile.name
-                    st.success("✅ Video uploaded successfully!")
+                    st.success(" Video uploaded successfully!")
                 else:
                     video_path = None
         else:
-            st.info("📹 Camera feed support coming soon!")
+            st.info(" Camera feed support coming soon!")
             video_path = None
         
         st.markdown("---")
         
         # Start button
-        if st.button("🚀 Start Detection", type="primary", width='stretch'):
+        if st.button(" Start Detection", type="primary", width='stretch'):
             if video_path and os.path.exists(video_path):
                 load_model()  # Load model using main pipeline function
                 st.session_state.started = True
@@ -460,15 +460,15 @@ def main_page():
                 st.session_state.processing_complete = False
                 st.rerun()
             else:
-                st.error("❌ Please select a valid video source!")
+                st.error(" Please select a valid video source!")
 
 
 def processing_page():
     """Processing page with video display and results"""
-    st.title("🥭 Mango Disease Detection - Live Processing")
+    st.title(" Mango Disease Detection - Live Processing")
     
     # Back button
-    if st.button("⬅️ Back to Home"):
+    if st.button("⬅ Back to Home"):
         st.session_state.started = False
         st.session_state.processing_complete = False
         st.session_state.results = []
@@ -480,10 +480,10 @@ def processing_page():
     video_col, frame_col = st.columns([2, 1])
     
     with video_col:
-        st.subheader("📹 Video Feed")
+        st.subheader(" Video Feed")
     
     with frame_col:
-        st.subheader("🖼️ Selected Frame & Results")
+        st.subheader(" Selected Frame & Results")
     
     # Status placeholder
     status_placeholder = st.empty()
@@ -508,7 +508,7 @@ def processing_page():
         
         # Show summary
         st.markdown("---")
-        st.subheader("📋 Detection Summary")
+        st.subheader(" Detection Summary")
         
         if results:
             # Create summary table
@@ -530,14 +530,14 @@ def processing_page():
 
             # ── Per-mango details & recommendations ───────────────
             st.markdown("---")
-            st.subheader("🔍 Inspection Details")
+            st.subheader(" Inspection Details")
 
             for idx, result in enumerate(results, 1):
                 with st.expander(f"Detection #{idx} - {result['prediction']['class_name']}"):
                     # Defect analysis metrics
                     da = result.get('defect_analysis', {})
                     if da:
-                        st.markdown("**🔎 Defect Analysis**")
+                        st.markdown("** Defect Analysis**")
                         d_col1, d_col2, d_col3 = st.columns(3)
                         with d_col1:
                             st.metric("Surface Quality", f"{da.get('surface_quality_score', 0):.0f}/100")
@@ -557,7 +557,7 @@ def processing_page():
                     # ── Export country recommendation via RAG ──────────────
                     st.markdown("---")
                     rec_key = f"rec_{idx}"
-                    if st.button("🌍 Get Export Country Recommendation",
+                    if st.button(" Get Export Country Recommendation",
                                  key=f"btn_rec_{idx}"):
                         with st.spinner("Querying export regulations..."):
                             try:
@@ -581,10 +581,10 @@ def processing_page():
                     if rec_key in st.session_state:
                         rec = st.session_state[rec_key]
                         if rec.get('status') == 'success':
-                            st.markdown("**🌍 Export Recommendation:**")
+                            st.markdown("** Export Recommendation:**")
                             st.markdown(rec['answer'])
                             if rec.get('sources'):
-                                with st.expander("📚 Regulatory Sources"):
+                                with st.expander(" Regulatory Sources"):
                                     for s in rec['sources']:
                                         st.write(f"**{s['index']}.** {s['source']} — {s['section']}")
                                         st.caption(s['content_preview'])
@@ -595,7 +595,7 @@ def processing_page():
             st.markdown("---")
             dl_col1, dl_col2 = st.columns([1, 3])
             with dl_col1:
-                generate_report = st.button("📄 Generate PDF Report", type="primary")
+                generate_report = st.button(" Generate PDF Report", type="primary")
             if generate_report:
                 with st.spinner("Generating PDF report..."):
                     try:
@@ -633,7 +633,7 @@ def processing_page():
             if "report_pdf" in st.session_state:
                 with dl_col2:
                     st.download_button(
-                        label="⬇️ Download PDF Report",
+                        label="⬇ Download PDF Report",
                         data=st.session_state["report_pdf"],
                         file_name=st.session_state.get("report_name", "mango_report.pdf"),
                         mime="application/pdf",
@@ -646,7 +646,7 @@ def processing_page():
 def main():
     # Sidebar
     with st.sidebar:
-        st.title("⚙️ Settings")
+        st.title(" Settings")
         
         st.markdown("### Model Configuration")
         st.info(f"**Model:** {config.MODEL_PATH.split('/')[-1]}")

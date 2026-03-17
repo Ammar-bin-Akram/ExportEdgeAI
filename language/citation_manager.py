@@ -75,9 +75,9 @@ def save_chunks_for_citation(chunks, chunks_path):
     with open(os.path.join(chunks_path, "chunk_statistics.json"), "w", encoding="utf-8") as f:
         json.dump(stats, f, indent=2, ensure_ascii=False)
     
-    print(f"✅ Saved {len(chunks)} chunks to {chunks_path}")
-    print(f"📊 Chunk statistics saved to chunk_statistics.json")
-    print(f"🗂️  Chunk mapping saved to chunk_mapping.json")
+    print(f" Saved {len(chunks)} chunks to {chunks_path}")
+    print(f" Chunk statistics saved to chunk_statistics.json")
+    print(f"  Chunk mapping saved to chunk_mapping.json")
 
 def load_chunk_by_index(chunk_index, chunks_path):
     """
@@ -131,7 +131,7 @@ def test_retriever(retriever, test_queries, chunks_path):
     print("="*60)
     
     for query in test_queries:
-        print(f"\n🔍 Query: {query}")
+        print(f"\n Query: {query}")
         print("-" * 50)
         
         try:
@@ -150,7 +150,7 @@ def test_retriever(retriever, test_queries, chunks_path):
                         chunk_index = j
                         break
                 
-                print(f"\n📄 Result {i}:")
+                print(f"\n Result {i}:")
                 print(f"   Source: {doc.metadata['source']}")
                 print(f"   Section: {doc.metadata.get('section_heading', 'N/A')}")
                 print(f"   Chunk Type: {doc.metadata.get('chunk_type', 'N/A')}")
@@ -160,4 +160,4 @@ def test_retriever(retriever, test_queries, chunks_path):
                 print(f"   Content: {doc.page_content[:300]}...")
                 
         except Exception as e:
-            print(f"❌ Error retrieving documents: {e}")
+            print(f" Error retrieving documents: {e}")

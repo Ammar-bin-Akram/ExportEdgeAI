@@ -4,7 +4,7 @@ import streamlit as st
 # Page configuration - MUST BE FIRST
 st.set_page_config(
     page_title="Export Edge AI",
-    page_icon="🥭",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -82,7 +82,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
     info_placeholder = frame_col.empty()
     prediction_placeholder = frame_col.empty()
     
-    status_placeholder.info(f"📹 Processing video: {total_frames} frames at {fps} FPS")
+    status_placeholder.info(f" Processing video: {total_frames} frames at {fps} FPS")
     
     while True:
         ret, frame = cap.read()
@@ -113,7 +113,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
             in_motion = True
             motion_buffer = []
             low_motion_counter = 0
-            status_placeholder.warning(f"🔍 Motion detected at frame {frame_idx}")
+            status_placeholder.warning(f" Motion detected at frame {frame_idx}")
         
         if in_motion:
             motion_buffer.append((frame.copy(), motion_area, frame_idx, timestamp_ms))
@@ -130,22 +130,22 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                         motion_buffer, key=lambda x: x[1]
                     )
                     
-                    status_placeholder.info(f"✅ Peak frame selected: Frame {best_idx}")
+                    status_placeholder.info(f" Peak frame selected: Frame {best_idx}")
                     
                     # Process through pipeline
-                    info_placeholder.info("⚙️ Processing...")
+                    info_placeholder.info(" Processing...")
                     result = pipeline.process_single_frame_detailed(best_frame)
                     
                     # Display original
                     roi_rgb = cv2.cvtColor(result['original'], cv2.COLOR_BGR2RGB)
-                    frame_placeholder.image(roi_rgb, caption="🥭 Detected Mango", 
+                    frame_placeholder.image(roi_rgb, caption=" Detected Mango", 
                                           use_container_width=True)
                     
                     # Check if segmentation was performed
                     if result['segmentation_overlay'] is not None:
                         # Display segmented overlay
                         overlay_rgb = cv2.cvtColor(result['segmentation_overlay'], cv2.COLOR_BGR2RGB)
-                        frame_placeholder.image(overlay_rgb, caption="🥭 Disease Segmentation", 
+                        frame_placeholder.image(overlay_rgb, caption=" Disease Segmentation", 
                                               use_container_width=True)
                         
                         # Display results with segmentation info
@@ -158,7 +158,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                         # Show disease statistics
                         if 'disease_statistics' in result:
                             stats = result['disease_statistics']
-                            with frame_col.expander("🔬 Disease Statistics"):
+                            with frame_col.expander(" Disease Statistics"):
                                 st.write(f"**Number of Regions:** {stats['num_regions']}")
                                 st.write(f"**Largest Region:** {stats['largest_region_area']:.0f} pixels")
                                 st.write(f"**Average Region:** {stats['average_region_area']:.0f} pixels")
@@ -171,7 +171,7 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
                     
                     # Show top-k predictions
                     if 'top_k_predictions' in result:
-                        with frame_col.expander("📊 Top Predictions"):
+                        with frame_col.expander(" Top Predictions"):
                             for class_name, prob in result['top_k_predictions']:
                                 st.progress(prob, text=f"{class_name}: {prob:.2%}")
                     
@@ -203,24 +203,24 @@ def process_video_with_ui(video_path, video_col, frame_col, status_placeholder):
         detected_frames.append(result_data)
     
     cap.release()
-    status_placeholder.success(f"✅ Processing complete! Detected {len(detected_frames)} mangoes")
+    status_placeholder.success(f" Processing complete! Detected {len(detected_frames)} mangoes")
     
     return detected_frames
 
 
 def main_page():
     """Main landing page with start button"""
-    st.title("🥭 Mango Disease Detection System")
+    st.title(" Mango Disease Detection System")
     st.markdown("---")
     
     st.markdown("""
     ### Welcome to the Mango Disease Detection System
     
     This system uses computer vision and deep learning to:
-    - 🎥 **Extract frames** from video with motion detection
-    - 🔍 **Classify** mango varieties and health status
-    - 🔬 **Segment** diseased regions (if detected)
-    - 📊 **Analyze** disease coverage and statistics
+    -  **Extract frames** from video with motion detection
+    -  **Classify** mango varieties and health status
+    -  **Segment** diseased regions (if detected)
+    -  **Analyze** disease coverage and statistics
     
     **Supported Varieties:**
     - Anwar Ratool
@@ -235,7 +235,7 @@ def main_page():
     
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("🚀 Start Processing", use_container_width=True, type="primary"):
+        if st.button(" Start Processing", use_container_width=True, type="primary"):
             if not st.session_state.pipeline_loaded:
                 with st.spinner("Loading pipeline..."):
                     st.session_state.pipeline = initialize_pipeline()
@@ -246,32 +246,32 @@ def main_page():
 
 def processing_page():
     """Processing page with video upload and results"""
-    st.title("🥭 Mango Disease Detection")
+    st.title(" Mango Disease Detection")
     
     # Sidebar
     with st.sidebar:
-        st.header("⚙️ Settings")
+        st.header(" Settings")
         
         # Model status
-        st.subheader("🤖 Model Status")
+        st.subheader(" Model Status")
         if st.session_state.pipeline_loaded:
-            st.success("✅ Pipeline loaded")
+            st.success(" Pipeline loaded")
             pipeline = st.session_state.pipeline
-            st.info(f"🔬 Segmentation: {'Enabled' if pipeline.settings.ENABLE_SEGMENTATION else 'Disabled'}")
+            st.info(f" Segmentation: {'Enabled' if pipeline.settings.ENABLE_SEGMENTATION else 'Disabled'}")
         else:
-            st.warning("⚠️ Pipeline not loaded")
+            st.warning(" Pipeline not loaded")
         
         st.markdown("---")
         
         # Navigation
-        if st.button("⬅️ Back to Home"):
+        if st.button("⬅ Back to Home"):
             st.session_state.started = False
             st.session_state.processing_complete = False
             st.session_state.results = []
             st.rerun()
     
     # Main content
-    st.markdown("### 📤 Upload Video")
+    st.markdown("###  Upload Video")
     
     uploaded_file = st.file_uploader(
         "Choose a video file",
@@ -285,23 +285,23 @@ def processing_page():
             tmp_file.write(uploaded_file.read())
             video_path = tmp_file.name
         
-        st.success(f"✅ Video uploaded: {uploaded_file.name}")
+        st.success(f" Video uploaded: {uploaded_file.name}")
         
         # Process button
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("▶️ Process Video", use_container_width=True, type="primary"):
+            if st.button("▶ Process Video", use_container_width=True, type="primary"):
                 st.session_state.processing_complete = False
                 
                 # Create layout for real-time display
                 st.markdown("---")
-                st.markdown("### 🎬 Real-time Processing")
+                st.markdown("###  Real-time Processing")
                 
                 status_placeholder = st.empty()
                 video_col, frame_col = st.columns(2)
                 
-                video_col.markdown("#### 📹 Video Stream")
-                frame_col.markdown("#### 🥭 Detection Results")
+                video_col.markdown("####  Video Stream")
+                frame_col.markdown("####  Detection Results")
                 
                 # Process video
                 try:
@@ -319,14 +319,14 @@ def processing_page():
                     os.unlink(video_path)
                     
                 except Exception as e:
-                    st.error(f"❌ Error during processing: {str(e)}")
+                    st.error(f" Error during processing: {str(e)}")
                     os.unlink(video_path)
                     return
         
         # Display results if processing complete
         if st.session_state.processing_complete and st.session_state.results:
             st.markdown("---")
-            st.markdown("### 📊 Processing Summary")
+            st.markdown("###  Processing Summary")
             
             results = st.session_state.results
             
@@ -359,12 +359,12 @@ def processing_page():
                     st.metric("Avg Disease Coverage", f"{avg_disease:.1f}%")
             
             # Variety distribution
-            st.markdown("#### 🥭 Variety Distribution")
+            st.markdown("####  Variety Distribution")
             variety_data = {variety: count for variety, count in sorted(variety_counts.items())}
             st.bar_chart(variety_data)
             
             # Detailed results
-            st.markdown("#### 📋 Detailed Results")
+            st.markdown("####  Detailed Results")
             
             for idx, r in enumerate(results, 1):
                 result = r['result']

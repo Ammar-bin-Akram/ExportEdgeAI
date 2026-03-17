@@ -46,7 +46,7 @@ def validate_config() -> bool:
     for path in [OUTPUT_PATH, CHUNKS_PATH, VECTOR_STORE_PATH]:
         os.makedirs(path, exist_ok=True)
     
-    logger.info("✅ Configuration validated")
+    logger.info(" Configuration validated")
     return True
 
 def process_documents(skip_if_exists: bool = False) -> List[Dict[str, Any]]:
@@ -60,7 +60,7 @@ def process_documents(skip_if_exists: bool = False) -> List[Dict[str, Any]]:
         # Load existing cleaned documents (simplified - you might want to implement this)
         docs = load_documents_as_text(DATA_PATH)
         elapsed = time.time() - start_time
-        logger.info(f"✅ Loaded {len(docs)} existing documents in {elapsed:.2f}s")
+        logger.info(f" Loaded {len(docs)} existing documents in {elapsed:.2f}s")
         return docs
     
     docs = load_documents_as_text(DATA_PATH)
@@ -78,7 +78,7 @@ def process_documents(skip_if_exists: bool = False) -> List[Dict[str, Any]]:
     # Save cleaned documents
     save_cleaned_documents(cleaned_docs, OUTPUT_PATH)
     elapsed = time.time() - start_time
-    logger.info(f"✅ Step 1 completed: {len(cleaned_docs)} documents processed in {elapsed:.2f}s")
+    logger.info(f" Step 1 completed: {len(cleaned_docs)} documents processed in {elapsed:.2f}s")
     
     return cleaned_docs
 
@@ -94,7 +94,7 @@ def create_chunks(documents: List[Dict[str, Any]]) -> List[Any]:
     total_chars = sum(len(doc['content']) for doc in documents)
     avg_chunk_size = total_chars / len(chunks) if chunks else 0
     
-    logger.info(f"✅ Step 2 completed: Created {len(chunks)} chunks")
+    logger.info(f" Step 2 completed: Created {len(chunks)} chunks")
     logger.info(f"   Average chunk size: {avg_chunk_size:.0f} characters")
     logger.info(f"   Processing time: {elapsed:.2f}s")
     
@@ -112,12 +112,12 @@ def create_vector_store(chunks: List[Any], force_recreate: bool = False) -> Tupl
         logger.info("Existing vector store found, loading...")
         vector_store, embeddings = load_vectorstore(VECTOR_STORE_PATH)
         elapsed = time.time() - start_time
-        logger.info(f"✅ Step 3 completed: Vector store loaded in {elapsed:.2f}s")
+        logger.info(f" Step 3 completed: Vector store loaded in {elapsed:.2f}s")
     else:
         logger.info(f"Creating new vector store with {len(chunks)} chunks...")
         vector_store, embeddings = create_embeddings_and_vectorstore(chunks, VECTOR_STORE_PATH)
         elapsed = time.time() - start_time
-        logger.info(f"✅ Step 3 completed: Vector store created in {elapsed:.2f}s")
+        logger.info(f" Step 3 completed: Vector store created in {elapsed:.2f}s")
     
     return vector_store, embeddings
 
@@ -129,7 +129,7 @@ def setup_retriever(vector_store: Any) -> Any:
     retriever = create_retriever(vector_store, search_type=SEARCH_TYPE, k=RETRIEVAL_K)
     elapsed = time.time() - start_time
     
-    logger.info(f"✅ Step 4 completed: Retriever configured (k={RETRIEVAL_K}, {elapsed:.2f}s)")
+    logger.info(f" Step 4 completed: Retriever configured (k={RETRIEVAL_K}, {elapsed:.2f}s)")
     return retriever
 
 def test_pipeline(retriever: Any, run_tests: bool = True) -> None:
@@ -144,7 +144,7 @@ def test_pipeline(retriever: Any, run_tests: bool = True) -> None:
     test_retriever(retriever, TEST_QUERIES, CHUNKS_PATH)
     elapsed = time.time() - start_time
     
-    logger.info(f"✅ Step 5 completed: Retriever tested with {len(TEST_QUERIES)} queries in {elapsed:.2f}s")
+    logger.info(f" Step 5 completed: Retriever tested with {len(TEST_QUERIES)} queries in {elapsed:.2f}s")
 
 def test_rag_pipeline(retriever: Any, run_tests: bool = True, custom_queries: Optional[List[str]] = None) -> List[Dict[str, Any]]:
     """Test the complete RAG pipeline with LLM integration"""
@@ -169,7 +169,7 @@ def test_rag_pipeline(retriever: Any, run_tests: bool = True, custom_queries: Op
             successful_queries = sum(1 for r in results if r.get('status') == 'success')
             avg_response_time = elapsed / len(results) if results else 0
             
-            logger.info(f"✅ Step 6 completed: RAG pipeline tested successfully")
+            logger.info(f" Step 6 completed: RAG pipeline tested successfully")
             logger.info(f"   Queries processed: {len(results)}")
             logger.info(f"   Success rate: {successful_queries}/{len(results)} ({100*successful_queries/len(results):.1f}%)")
             logger.info(f"   Average response time: {avg_response_time:.2f}s per query")
@@ -195,7 +195,7 @@ def main(skip_existing: bool = False, force_recreate_vectors: bool = False,
     """
     pipeline_start = time.time()
     logger.info("=" * 60)
-    logger.info("🚀 Starting Enhanced Document Processing Pipeline")
+    logger.info(" Starting Enhanced Document Processing Pipeline")
     logger.info("=" * 60)
     
     # Validate configuration
@@ -214,7 +214,7 @@ def main(skip_existing: bool = False, force_recreate_vectors: bool = False,
         logger.info("Step 3: Saving chunks for citation...")
         save_chunks_for_citation(chunks, CHUNKS_PATH)
         chunk_elapsed = time.time() - chunk_start
-        logger.info(f"✅ Step 3 completed: Chunks saved in {chunk_elapsed:.2f}s")
+        logger.info(f" Step 3 completed: Chunks saved in {chunk_elapsed:.2f}s")
         
         # Create vector store
         vector_store, embeddings = create_vector_store(chunks, force_recreate=force_recreate_vectors)
@@ -231,20 +231,20 @@ def main(skip_existing: bool = False, force_recreate_vectors: bool = False,
         # Final summary
         total_elapsed = time.time() - pipeline_start
         logger.info("=" * 60)
-        logger.info("🎉 PIPELINE COMPLETED SUCCESSFULLY!")
+        logger.info(" PIPELINE COMPLETED SUCCESSFULLY!")
         logger.info("=" * 60)
-        logger.info(f"📁 Cleaned documents: {OUTPUT_PATH}")
-        logger.info(f"📝 Chunks: {CHUNKS_PATH} ({len(chunks)} chunks)")
-        logger.info(f"🔍 Vector store: {VECTOR_STORE_PATH}")
+        logger.info(f" Cleaned documents: {OUTPUT_PATH}")
+        logger.info(f" Chunks: {CHUNKS_PATH} ({len(chunks)} chunks)")
+        logger.info(f" Vector store: {VECTOR_STORE_PATH}")
         if rag_results:
-            logger.info(f"🤖 RAG test results: {len(rag_results)} queries processed")
-        logger.info(f"⏱️  Total pipeline time: {total_elapsed:.2f}s")
+            logger.info(f" RAG test results: {len(rag_results)} queries processed")
+        logger.info(f" Total pipeline time: {total_elapsed:.2f}s")
         logger.info("=" * 60)
         
         return vector_store, retriever, embeddings
         
     except Exception as e:
-        logger.error(f"❌ Pipeline failed: {e}")
+        logger.error(f" Pipeline failed: {e}")
         raise
 
 def load_existing_pipeline(run_tests: bool = False) -> Tuple[Any, Any, Any]:
@@ -257,7 +257,7 @@ def load_existing_pipeline(run_tests: bool = False) -> Tuple[Any, Any, Any]:
         retriever = create_retriever(vector_store, search_type=SEARCH_TYPE, k=RETRIEVAL_K)
         
         elapsed = time.time() - start_time
-        logger.info(f"✅ Existing pipeline loaded successfully in {elapsed:.2f}s")
+        logger.info(f" Existing pipeline loaded successfully in {elapsed:.2f}s")
         
         if run_tests:
             test_pipeline(retriever, run_tests=True)

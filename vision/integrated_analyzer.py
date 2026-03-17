@@ -255,7 +255,7 @@ def demo_integration(image_path: str, save_results: bool = True):
         image_path: Path to test mango image
         save_results: Whether to save result images
     """
-    print("🍋 Mango Defect Detection Integration Demo")
+    print(" Mango Defect Detection Integration Demo")
     print("=" * 50)
     
     # Load test image
@@ -283,24 +283,24 @@ def demo_integration(image_path: str, save_results: bool = True):
     # Print results
     print("\nOpenCV Defect Detection Results:")
     opencv_defects = result['opencv_defects']
-    print(f"  📊 Total defect percentage: {opencv_defects['total_defect_percentage']:.2f}%")
-    print(f"  🔍 Number of defects: {opencv_defects['defect_count']}")
-    print(f"  🎨 Color uniformity: {opencv_defects['color_uniformity']:.1f}/100")
-    print(f"  ✨ Surface quality: {opencv_defects['surface_quality']:.1f}/100")
-    print(f"  📈 Export grade impact: {opencv_defects['export_grade_impact']}")
+    print(f"   Total defect percentage: {opencv_defects['total_defect_percentage']:.2f}%")
+    print(f"   Number of defects: {opencv_defects['defect_count']}")
+    print(f"   Color uniformity: {opencv_defects['color_uniformity']:.1f}/100")
+    print(f"   Surface quality: {opencv_defects['surface_quality']:.1f}/100")
+    print(f"   Export grade impact: {opencv_defects['export_grade_impact']}")
     
     print("\nCombined Analysis:")
     combined = result['combined_analysis']
-    print(f"  🏆 Overall quality score: {combined['overall_quality_score']:.1f}/100")
-    print(f"  🥇 Grade category: {combined['grade_category']}")
-    print(f"  ⚠️ Quality issues: {', '.join(combined['quality_issues']) if combined['quality_issues'] else 'None'}")
+    print(f"   Overall quality score: {combined['overall_quality_score']:.1f}/100")
+    print(f"   Grade category: {combined['grade_category']}")
+    print(f"   Quality issues: {', '.join(combined['quality_issues']) if combined['quality_issues'] else 'None'}")
     
     print("\nExport Recommendations:")
     export_rec = result['export_recommendations']
-    print(f"  🌍 Suitable markets: {', '.join(export_rec['suitable_markets'])}")
-    print(f"  🚫 Restrictions: {', '.join(export_rec['restrictions']) if export_rec['restrictions'] else 'None'}")
+    print(f"   Suitable markets: {', '.join(export_rec['suitable_markets'])}")
+    print(f"   Restrictions: {', '.join(export_rec['restrictions']) if export_rec['restrictions'] else 'None'}")
     
-    print("\n🤖 RAG Feature Description (for export country prediction):")
+    print("\n RAG Feature Description (for export country prediction):")
     print(export_rec['feature_description'])
     
     # Save visualization if requested
@@ -312,9 +312,9 @@ def demo_integration(image_path: str, save_results: bool = True):
         viz_image = analyzer.create_comprehensive_visualization(image, result)
         output_path = output_dir / "comprehensive_analysis.jpg"
         cv2.imwrite(str(output_path), viz_image)
-        print(f"\n💾 Visualization saved to: {output_path}")
+        print(f"\n Visualization saved to: {output_path}")
     
-    print(f"\n⚡ Processing time: {result['performance']['total_processing_time']:.3f}s")
+    print(f"\n Processing time: {result['performance']['total_processing_time']:.3f}s")
     print("=" * 50)
 
 
