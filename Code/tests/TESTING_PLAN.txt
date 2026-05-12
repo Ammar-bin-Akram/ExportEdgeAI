@@ -1,0 +1,357 @@
+================================================================================
+                              TESTING PLAN
+          ExportEdge AI — Mango Quality & Export Advisory System
+                          Final Year Project
+================================================================================
+
+  Project:      ExportEdge AI
+  Type:         Standalone Edge-Device Application
+  Deployment:   Mango Export Factory (Conveyor-Belt Inspection Station)
+  Platform:     Python 3.12 / Streamlit / TFLite / PyTorch / OpenCV
+  Date:         March 2026
+
+================================================================================
+1. INTRODUCTION
+================================================================================
+
+ExportEdge AI is a standalone application deployed on an edge device inside
+a mango export factory. It automates the quality inspection of mangoes on a
+conveyor belt using computer vision, deep-learning classification, semantic
+segmentation, defect analysis, and a Retrieval-Augmented Generation (RAG)
+pipeline for country-specific export recommendations.
+
+This document outlines the testing plan covering six types of testing:
+Unit Testing, Integration Testing, System Testing, Reliability Testing,
+Usability Testing, and Environment Testing.
+
+================================================================================
+2. UNIT TESTING
+================================================================================
+
+Approach:
+  Test individual functions, classes, and methods in complete isolation
+  using synthetic data (NumPy arrays, mock dictionaries). No real models,
+  video files, or external servers are required.
+
+What will be tested:
+
+  • Configuration & settings values (data types, value ranges, thresholds,
+    HSV colour ranges, class names, file paths)
+
+  • Image preprocessing functions (sharpen, enhance contrast, remove shadow,
+    denoise, colour correction, unsharp mask, resize, composite pipelines)
+    — output shape, data type, and pixel value range preservation
+
+  • Image postprocessing functions (blur, contrast adjustment, deblur,
+    shadow removal, smoothing) — output shape, data type, pixel value
+    range, and behaviour on very small images
+
+  • Text processing utilities (table-of-contents extraction via regex,
+    TOC removal, case-insensitive pattern matching, markdown section
+    parsing, document chunking with metadata and sequential IDs)
+
+  • Defect detection data structures (DefectRegion and DefectAnalysis
+    field construction and default values)
+
+  • Defect detector scoring (surface quality calculation, colour
+    uniformity analysis, score ranges, grade impact classification)
+
+  • Export grade mapping logic (grade A/B/C assignment based on defect
+    percentage and impact severity thresholds)
+
+  • LLM output parsing (extraction of recommended countries, not-recommended
+    countries, actionable steps, and conditions from structured text;
+    handling of empty or malformed input)
+
+  • Export advisor metadata construction (grade derivation, safe defaults
+    for missing data)
+
+  • Integrated quality assessment (grading thresholds for Grade A, B, C,
+    and Processing; overall score calculation; issue list generation)
+
+  • Export market suitability mapping (Grade A → premium markets,
+    Grade B → standard markets, feature description generation)
+
+  • Report generation helpers (image-to-Base64 encoding, dictionary-to-
+    namespace conversion, nested structure handling)
+
+  • Segmentation utilities (overlay creation, diseased region extraction,
+    disease statistics from masks, empty mask handling, bounding box
+    generation)
+
+  • Pipeline factory pattern (pipeline registration, case-insensitive
+    lookup, unknown-fruit error handling, available-fruits listing)
+
+  • Abstract pipeline interface (single-frame processing, segmentation
+    toggle behaviour, video processing error paths)
+
+================================================================================
+3. INTEGRATION TESTING
+================================================================================
+
+Approach:
+  Wire multiple modules together and pass realistic data through the
+  combined pipeline. Validate that output structures (JSON schemas,
+  required keys, value types) match what downstream consumers expect.
+
+What will be tested:
+
+  • Defect detection → export grading flow (defect detector output
+    correctly feeds into export advisor to produce a valid grade)
+
+  • Full integrated analysis pipeline (classification + defect analysis +
+    segmentation combined in a single call, verifying all expected result
+    keys are present)
+
+  • Integrated analysis with segmentation disabled (graceful handling
+    when ML segmentation is turned off)
+
+  • JSON inspection report schema (simulated export produces all fields
+    required by the Streamlit dashboard and PDF report generator)
+
+  • Multi-document chunking (chunks from multiple source files retain
+    correct source metadata and non-empty content)
+
+  • Preprocessing → postprocessing round-trip (image shape, data type,
+    and pixel range preserved across the full transform chain)
+
+  • Prompt template and RAG configuration validation (JSON structure
+    integrity, presence of all required configuration keys)
+
+================================================================================
+4. SYSTEM TESTING
+================================================================================
+
+Approach:
+  Manual end-to-end testing using the Streamlit web dashboard with real
+  video inputs, live models, and the full inspection workflow — simulating
+  actual factory operation.
+
+What will be tested:
+
+  • Healthy mango inspection workflow (video upload → motion detection →
+    classification → grade assignment → PDF report generation)
+
+  • Diseased mango inspection workflow (disease class identification,
+    defect region detection, segmentation overlay display)
+
+  • Export recommendation generation (RAG-based country-specific
+    recommendations with actionable steps for a given grade)
+
+  • PDF report download (report contains mango image, classification
+    result, grade, and defect analysis details)
+
+  • JSON inspection log creation (structured log saved to disk with
+    all required fields after each inspection)
+
+  • RAG chat with regulatory questions (response relevance, source
+    document citations displayed to the user)
+
+  • Quick-prompt button functionality on the chat page (pre-defined
+    prompts generate relevant responses)
+
+  • Multi-mango video processing (each detected mango receives its
+    own result card with individual classification and grade)
+
+================================================================================
+5. RELIABILITY TESTING
+================================================================================
+
+Approach:
+  Perform repeated and sustained operations to detect memory leaks,
+  performance degradation, or intermittent failures. Simulate failure
+  conditions and verify graceful error handling.
+
+What will be tested:
+
+  • Repeated identical inspections (same video processed multiple
+    consecutive times — results consistency, no crashes or hangs)
+
+  • Consecutive different video inspections in a single session
+    (memory usage remains stable, no resource leaks)
+
+  • Application behaviour when the LLM server (LM Studio) is
+    unavailable (informative error message, no crash)
+
+  • Handling of corrupt or empty video files (error message displayed,
+    application continues to accept new input)
+
+  • Long-running session stability (application running for an extended
+    period with periodic inspections — CPU and RAM usage monitored for
+    unbounded growth)
+
+================================================================================
+6. USABILITY TESTING
+================================================================================
+
+Approach:
+  Task-based testing with participants who have no prior training on the
+  application. Observe task completion, time taken, errors made, and
+  collect subjective satisfaction ratings.
+
+What will be tested:
+
+  • Ability to upload a video and start an inspection without assistance
+
+  • Ability to read and understand the inspection results (classification
+    label and export grade) from the dashboard
+
+  • Ability to locate and download the PDF inspection report
+
+  • Ability to navigate between application pages using the sidebar
+
+  • Ability to ask a question in the RAG chat and receive a response
+
+  • Ability to identify recommended export countries from the results
+    page without external guidance
+
+================================================================================
+7. ENVIRONMENT TESTING
+================================================================================
+
+Approach:
+  Deploy the application on the target edge device (or equivalent spec)
+  and verify that all dependencies install, models load, the UI is
+  accessible, and inference speed meets real-time requirements.
+
+What will be tested:
+
+  • Dependency installation on the edge device (all Python packages
+    install without errors from requirements.txt)
+
+  • Model loading (TFLite classification model and PyTorch DeepLabV3
+    segmentation model load within acceptable time and memory limits)
+
+  • Streamlit dashboard accessibility (application starts and the UI
+    loads in a browser on the device or over the local network)
+
+  • Camera / video source connectivity (USB camera or RTSP stream
+    frames are captured and displayed in the application)
+
+  • Classification inference speed (per-frame latency on edge hardware)
+
+  • Segmentation inference speed (per-frame latency on edge hardware)
+
+  • LLM server operation on the edge device (DeepSeek R1 via LM Studio
+    responds to RAG queries within acceptable time)
+
+  • Disk space consumption for logs, reports, and inspection data over
+    repeated use
+
+  • Python version compatibility (application runs on the target Python
+    version without syntax or import errors)
+
+  • Browser compatibility (dashboard renders correctly in Chrome and
+    Firefox on the edge device or connected LAN machine)
+
+================================================================================
+8. FUNCTIONAL vs NON-FUNCTIONAL TESTING CLASSIFICATION
+================================================================================
+
+The six testing types are classified into two broad categories:
+
+  FUNCTIONAL TESTING
+  ──────────────────
+  Functional tests verify that the system does what it is supposed to do —
+  i.e., the features and behaviours defined in the requirements.
+
+  ┌───────────────────────┬─────────────────────────────────────────────────┐
+  │ Testing Type          │ Why It Is Functional                            │
+  ├───────────────────────┼─────────────────────────────────────────────────┤
+  │ Unit Testing          │ Verifies that each individual function produces │
+  │                       │ the correct output for a given input — i.e.,   │
+  │                       │ the function works as specified.                │
+  ├───────────────────────┼─────────────────────────────────────────────────┤
+  │ Integration Testing   │ Verifies that connected modules exchange data   │
+  │                       │ correctly and produce the expected combined     │
+  │                       │ output — i.e., features work across boundaries.│
+  ├───────────────────────┼─────────────────────────────────────────────────┤
+  │ System Testing        │ Verifies the complete application end-to-end    │
+  │                       │ against real-world scenarios — i.e., the full  │
+  │                       │ inspection workflow delivers correct results.   │
+  └───────────────────────┴─────────────────────────────────────────────────┘
+
+  NON-FUNCTIONAL TESTING
+  ──────────────────────
+  Non-functional tests evaluate quality attributes beyond correctness —
+  how well the system performs, how easy it is to use, and how it behaves
+  in its target deployment environment.
+
+  ┌───────────────────────┬─────────────────────────────────────────────────┐
+  │ Testing Type          │ Why It Is Non-Functional                        │
+  ├───────────────────────┼─────────────────────────────────────────────────┤
+  │ Reliability Testing   │ Tests stability, consistency, and fault         │
+  │                       │ tolerance under sustained and repeated use —   │
+  │                       │ a quality attribute, not a feature.             │
+  ├───────────────────────┼─────────────────────────────────────────────────┤
+  │ Usability Testing     │ Tests ease of use, learnability, and operator   │
+  │                       │ satisfaction — subjective quality measures,    │
+  │                       │ not functional requirements.                    │
+  ├───────────────────────┼─────────────────────────────────────────────────┤
+  │ Environment Testing   │ Tests deployment compatibility, performance on │
+  │                       │ target hardware, and infrastructure readiness  │
+  │                       │ — operational quality, not feature correctness.│
+  └───────────────────────┴─────────────────────────────────────────────────┘
+
+================================================================================
+9. TESTING ENVIRONMENT & TOOLS
+================================================================================
+
+9.1  Hardware
+─────────────
+  • Development Machine: Windows 10/11 PC, 16 GB RAM, GPU optional
+  • Target Deployment: Edge device (e.g. NVIDIA Jetson, industrial mini-PC)
+    with USB camera or RTSP video source on the factory conveyor belt
+
+9.2  Software & Runtime
+───────────────────────
+  • Python 3.12.4 with virtual environment (venv)
+  • Streamlit — web-based dashboard UI
+  • TensorFlow Lite — MobileNet classification model inference
+  • PyTorch — DeepLabV3-MobileNet segmentation model inference
+  • OpenCV 4.x — image processing, video capture, defect detection
+  • LangChain + FAISS — RAG document retrieval and vector store
+  • LM Studio + DeepSeek R1 — local LLM server for export recommendations
+  • Jinja2 + xhtml2pdf — PDF report generation
+
+9.3  Testing Frameworks & Tools
+───────────────────────────────
+  • pytest 9.0.2 — automated test runner for unit and integration tests
+  • NumPy — synthetic image and mask generation for test fixtures
+  • Windows Task Manager / htop — CPU and RAM monitoring during
+    reliability tests
+  • Manual checklists — structured forms for system, usability, and
+    environment test evaluation
+  • Web browser (Chrome / Firefox) — Streamlit UI access during
+    manual testing
+
+9.4  Test Data
+──────────────
+  • Synthetic NumPy arrays (224×224 and 150×150 BGR images, binary masks)
+  • Mock dictionaries simulating defect analysis and pipeline results
+  • Sample markdown documents for chunker and regex tests
+  • Sample structured LLM output strings for parser tests
+  • Pre-recorded conveyor-belt videos with known mango conditions
+    (for system and reliability testing)
+
+================================================================================
+10. SUMMARY
+================================================================================
+
+  ┌───────────────────────┬───────────────────────────────────────────────────┐
+  │ Testing Type          │ Method                                            │
+  ├───────────────────────┼───────────────────────────────────────────────────┤
+  │ Unit Testing          │ Automated (pytest, synthetic data)                │
+  ├───────────────────────┼───────────────────────────────────────────────────┤
+  │ Integration Testing   │ Automated (pytest, multi-module pipelines)        │
+  ├───────────────────────┼───────────────────────────────────────────────────┤
+  │ System Testing        │ Manual (Streamlit dashboard, real video inputs)   │
+  ├───────────────────────┼───────────────────────────────────────────────────┤
+  │ Reliability Testing   │ Manual (repeated execution, resource monitoring)  │
+  ├───────────────────────┼───────────────────────────────────────────────────┤
+  │ Usability Testing     │ Manual (task-based with untrained participants)   │
+  ├───────────────────────┼───────────────────────────────────────────────────┤
+  │ Environment Testing   │ Manual (edge device deployment verification)      │
+  └───────────────────────┴───────────────────────────────────────────────────┘
+
+================================================================================

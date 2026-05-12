@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Mango Inspection Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+  body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 10pt;
+    color: #222;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ── Headings ─────────────────────────────────────── */
+  h1 {
+    color: #1a5632;
+    font-size: 16pt;
+    border-bottom: 2px solid #1a5632;
+    padding-bottom: 4px;
+    margin-top: 0;
+    margin-bottom: 4px;
+  }
+  h2 {
+    color: #2e7d32;
+    font-size: 13pt;
+    margin-top: 14px;
+    margin-bottom: 6px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 3px;
+  }
+  h3 {
+    color: #333;
+    font-size: 11pt;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+  h4 {
+    font-size: 10pt;
+    margin-top: 8px;
+    margin-bottom: 3px;
+    color: #444;
+  }
+
+  /* ── Metrics table ────────────────────────────────── */
+  .metrics {
+    border-collapse: collapse;
+    margin: 6px 0;
+  }
+  .metrics th {
+    background-color: #f1f8e9;
+    text-align: left;
+    padding: 3px 8px;
+    font-size: 9pt;
+  }
+  .metrics td {
+    padding: 3px 8px;
+    font-size: 9pt;
+    border-bottom: 1px solid #eee;
+  }
+
+  /* ── Grade badge ──────────────────────────────────── */
+  .grade-badge {
+    display: inline;
+    padding: 2px 10px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 10pt;
+  }
+  .grade-a { background-color: #2e7d32; }
+  .grade-b { background-color: #f9a825; color: #333; }
+  .grade-c { background-color: #c62828; }
+
+  /* ── Lists ────────────────────────────────────────── */
+  ul {
+    margin: 2px 0 6px 20px;
+    padding: 0;
+  }
+  li {
+    margin-bottom: 2px;
+    font-size: 9pt;
+  }
+
+  /* ── Disclaimer ───────────────────────────────────── */
+  .disclaimer {
+    font-size: 8pt;
+    color: #777;
+    font-style: italic;
+    margin-top: 14px;
+    padding: 6px 10px;
+    background-color: #f9f9f9;
+    border-left: 3px solid #ccc;
+  }
+
+  /* ── Footer ───────────────────────────────────────── */
+  .footer {
+    text-align: center;
+    font-size: 8pt;
+    color: #999;
+    margin-top: 10px;
+    padding-top: 6px;
+    border-top: 1px solid #ddd;
+  }
+</style>
+</head>
+<body>
+
+<h1>🥭 Mango Inspection Report</h1>
+<p style="font-size:9pt; color:#666; margin-top:2px;">
+  {{ report_date }}
+  {% if video_name %}&bull; Source: {{ video_name }}{% endif %}
+</p>
+
+{% for r in results %}
+<h2>Mango #{{ loop.index }} &mdash; {{ r.prediction_name }}
+  <span class="grade-badge grade-{{ r.grade|lower }}">Grade {{ r.grade }}</span>
+</h2>
+
+<h3>Inspection Results</h3>
+
+{% if r.images.original is defined and r.images.original %}
+<table width="100%" cellspacing="4"><tr>
+  <td width="50%" align="center" valign="top">
+    <img src="data:image/png;base64,{{ r.images.original }}"
+         width="200" alt="Original ROI"><br>
+    <span style="font-size:8pt; color:#666;">Original ROI</span>
+  </td>
+  {% if r.images.segmentation is defined and r.images.segmentation %}
+  <td width="50%" align="center" valign="top">
+    <img src="data:image/png;base64,{{ r.images.segmentation }}"
+         width="200" alt="Segmentation Overlay"><br>
+    <span style="font-size:8pt; color:#666;">Segmentation Overlay</span>
+  </td>
+  {% endif %}
+</tr></table>
+{% endif %}
+
+<table class="metrics" width="100%">
+  <tr>
+    <th width="35%">Metric</th>
+    <th width="15%">Value</th>
+    <th width="35%">Metric</th>
+    <th width="15%">Value</th>
+  </tr>
+  <tr>
+    <td width="35%">Surface Quality</td>
+    <td width="15%"><strong>{{ r.defect_analysis.surface_quality_score|round(0)|int }}/100</strong></td>
+    <td width="35%">Colour Uniformity</td>
+    <td width="15%"><strong>{{ r.defect_analysis.color_uniformity_score|round(0)|int }}/100</strong></td>
+  </tr>
+  <tr>
+    <td width="35%">Dark Spots</td>
+    <td width="15%">{{ r.defect_analysis.dark_spot_count }}</td>
+    <td width="35%">Brown Spots</td>
+    <td width="15%">{{ r.defect_analysis.brown_spot_count }}</td>
+  </tr>
+  <tr>
+    <td width="35%">Defect Area</td>
+    <td width="15%">{{ "%.2f"|format(r.defect_analysis.total_defect_percentage) }}%</td>
+    <td width="35%">Export Impact</td>
+    <td width="15%">{{ r.defect_analysis.export_grade_impact }}</td>
+  </tr>
+  {% if r.disease_pct is not none %}
+  <tr>
+    <td width="35%">Disease Coverage</td>
+    <td width="15%">{{ "%.2f"|format(r.disease_pct) }}%</td>
+    <td width="35%"></td>
+    <td width="15%"></td>
+  </tr>
+  {% endif %}
+</table>
+
+{% if r.recommendation and r.recommendation.status == 'success' %}
+  <h3>Export Recommendation</h3>
+  {% set rp = r.rec_parsed %}
+  {% set has_structured = rp.recommended_countries or rp.not_recommended or rp.actionable_steps or rp.conditions %}
+
+  {% if has_structured %}
+    {% if rp.recommended_countries %}
+    <h4>✅ Recommended Countries</h4>
+    <ul>
+      {% for item in rp.recommended_countries %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if rp.not_recommended %}
+    <h4>❌ Not Recommended</h4>
+    <ul>
+      {% for item in rp.not_recommended %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if rp.actionable_steps %}
+    <h4>🔧 Actionable Steps</h4>
+    <ul>
+      {% for item in rp.actionable_steps %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if rp.conditions %}
+    <h4>⚠️ Conditions Before Exporting</h4>
+    <ul>
+      {% for item in rp.conditions %}<li>{{ item }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  {% else %}
+    <!-- Fallback: show raw LLM answer when structured parsing yields nothing -->
+    <p style="font-size:9pt; white-space:pre-wrap;">{{ r.recommendation.answer }}</p>
+  {% endif %}
+
+  {% if r.price_estimates %}
+  <h4>💰 Estimated Export Price (UN Comtrade)</h4>
+  <table class="metrics" width="100%">
+    <tr>
+      <th width="38%">Country</th>
+      <th width="18%">Price (USD/kg)</th>
+      <th width="18%">Period</th>
+      <th width="26%">Mode</th>
+    </tr>
+    {% for p in r.price_estimates %}
+    <tr>
+      <td>{{ p.country or 'N/A' }}</td>
+      <td>
+        {% if p.status == 'success' %}
+          <strong>{{ "%.4f"|format(p.price_usd_per_kg) }}</strong>
+        {% else %}
+          N/A
+        {% endif %}
+      </td>
+      <td>{{ p.period if p.status == 'success' else 'N/A' }}</td>
+      <td>{{ p.query_mode if p.status == 'success' else p.status }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+{% elif not r.recommendation %}
+  <p style="color:#999; font-size:9pt; font-style:italic;">
+    Export recommendation was not requested for this mango.
+  </p>
+{% endif %}
+
+{% endfor %}
+
+<div class="disclaimer">
+  <strong>Disclaimer:</strong> This report is generated by an AI system and is intended
+  to provide recommendations only. It should not be used as the sole basis for
+  export decisions. Always consult with certified inspectors and local regulatory
+  authorities before making final export decisions.
+</div>
+
+<div class="footer">
+  ExportEdge AI &mdash; Mango Quality &amp; Export Advisory System &bull;
+  Generated {{ report_date }}
+</div>
+
+</body>
+</html>

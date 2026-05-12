@@ -1,3 +1,25 @@
+# Environment variables
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
 # Python cache
 __pycache__/
 *.py[cod]
@@ -5,6 +27,7 @@ __pycache__/
 # Virtual environments
 venv/
 .env/
+.env
 
 # IDE
 .vscode/
@@ -12,3 +35,28 @@ venv/
 
 # OS
 .DS_Store
+
+# folders 
+chunks/
+cleaned_data/
+vector_store/
+
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+/cleaned_data/
+/chunks/
+/vector_store/
+*.log
+rag_test_results.json
+
+# Model files (if any)
+*.pkl
+*.model
+*.bin
+
+# Data files (if sensitive)
+# /data_for_llm/  # Uncomment if data is sensitive

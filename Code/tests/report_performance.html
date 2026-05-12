@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>ExportEdge AI -- Performance Tests</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 32px 20px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .filter-btn { padding: 6px 16px; border-radius: 999px; border: 1px solid #334155;
+                   background: transparent; color: #94a3b8; cursor: pointer; font-size: 0.82rem;
+                   transition: all .15s; }
+    .filter-btn:hover, .filter-btn.active { background: #334155; color: #e2e8f0; }
+    tr.test-row { border-bottom: 1px solid #1e293b; }
+    tr.test-row:last-child { border-bottom: none; }
+    tr.test-row:hover td { background: rgba(255,255,255,.03); }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:32px;">
+    <div>
+      <div style="font-size:0.75rem;font-weight:700;letter-spacing:.1em;color:#f59e0b;text-transform:uppercase;margin-bottom:4px;">ExportEdge AI</div>
+      <h1 style="font-size:1.9rem;font-weight:800;color:#f1f5f9;letter-spacing:-.02em;">Performance Tests</h1>
+      <p style="color:#64748b;margin-top:4px;">Generated 06 May 2026, 23:12</p>
+    </div>
+    <div style="background:#22c55e22;border:1.5px solid #22c55e;border-radius:10px;padding:10px 22px;text-align:center;">
+      <div style="font-size:1.4rem;font-weight:900;color:#22c55e;">ALL PASSED</div>
+      <div style="font-size:0.78rem;color:#22c55eaa;margin-top:2px;">12.97s runtime</div>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px;">
+    <div style="background:#1e293b;border-radius:12px;padding:20px 22px;border:1px solid #334155;">
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#64748b;text-transform:uppercase;">Total</div>
+      <div style="font-size:2.4rem;font-weight:900;color:#f1f5f9;line-height:1.1;margin-top:6px;">13</div>
+      <div style="font-size:0.78rem;color:#475569;margin-top:4px;">test cases</div>
+    </div>
+    <div style="background:#1e293b;border-radius:12px;padding:20px 22px;border:1px solid #166534;">
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#4ade80;text-transform:uppercase;">Passed</div>
+      <div style="font-size:2.4rem;font-weight:900;color:#22c55e;line-height:1.1;margin-top:6px;">13</div>
+      <div style="font-size:0.78rem;color:#4ade8088;margin-top:4px;">100.0%</div>
+    </div>
+    <div style="background:#1e293b;border-radius:12px;padding:20px 22px;border:1px solid #334155;">
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#475569;text-transform:uppercase;">Failed</div>
+      <div style="font-size:2.4rem;font-weight:900;color:#475569;line-height:1.1;margin-top:6px;">0</div>
+      <div style="font-size:0.78rem;color:#334155;margin-top:4px;">0.0%</div>
+    </div>
+    <div style="background:#1e293b;border-radius:12px;padding:20px 22px;border:1px solid #334155;">
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#475569;text-transform:uppercase;">Skipped</div>
+      <div style="font-size:2.4rem;font-weight:900;color:#475569;line-height:1.1;margin-top:6px;">0</div>
+      <div style="font-size:0.78rem;color:#334155;margin-top:4px;">0.0%</div>
+    </div>
+    <div style="background:#1e293b;border-radius:12px;padding:20px 22px;border:1px solid #334155;">
+      <div style="font-size:0.7rem;font-weight:700;letter-spacing:.08em;color:#64748b;text-transform:uppercase;">Modules</div>
+      <div style="font-size:2.4rem;font-weight:900;color:#f1f5f9;line-height:1.1;margin-top:6px;">4</div>
+      <div style="font-size:0.78rem;color:#475569;margin-top:4px;">test files</div>
+    </div>
+  </div>
+
+  <!-- Pass rate bar -->
+  <div style="background:#1e293b;border-radius:12px;padding:20px 24px;border:1px solid #334155;margin-bottom:28px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <span style="font-size:0.82rem;font-weight:600;color:#94a3b8;">Pass Rate</span>
+      <span style="font-size:1.1rem;font-weight:800;color:#22c55e;">100.0%</span>
+    </div>
+    <div style="background:#334155;border-radius:999px;height:10px;overflow:hidden;">
+      <div style="display:flex;height:100%;border-radius:999px;overflow:hidden;">
+        <div style="width:100.0%;background:#22c55e;"></div>
+        <div style="width:0.0%;background:#ef4444;"></div>
+        <div style="width:0.0%;background:#a855f7;"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:18px;margin-top:10px;flex-wrap:wrap;">
+      <span style="font-size:0.75rem;color:#4ade80;">&#9632; Passed 100.0%</span>
+      <span style="font-size:0.75rem;color:#f87171;">&#9632; Failed/Error 0.0%</span>
+      <span style="font-size:0.75rem;color:#c084fc;">&#9632; Skipped 0.0%</span>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;" id="filter-bar">
+      <button class="filter-btn active" onclick="filterModules('all',this)">All</button>
+      <button class="filter-btn" onclick="filterModules('failed',this)">Failed only</button>
+      <button class="filter-btn" onclick="filterModules('passed',this)">Passed only</button>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="filter-btn" onclick="expandAll()">Expand all</button>
+      <button class="filter-btn" onclick="collapseAll()">Collapse all</button>
+    </div>
+  </div>
+
+  <!-- Modules -->
+  <div id="modules-container">
+    
+        <div class="module-block" style="margin-bottom:16px;background:#1e293b;border-radius:12px;overflow:hidden;border:1px solid #334155;">
+          <div onclick="toggle('TestDefectDetectionPerformance')"
+               style="display:flex;align-items:center;gap:14px;padding:14px 18px;
+                      cursor:pointer;user-select:none;background:#1e293b;transition:background .15s;"
+               onmouseover="this.style.background='#263348'"
+               onmouseout="this.style.background='#1e293b'">
+            <span style="font-size:1rem;color:#e2e8f0;flex:1;font-weight:600;">TestDefectDetectionPerformance</span>
+            <span style="font-size:0.8rem;color:#94a3b8;">3 tests</span>
+            <span style="font-size:0.8rem;color:#22c55e;">pass 3</span>
+            
+            
+            <div style="width:72px;background:#334155;border-radius:999px;height:6px;overflow:hidden;">
+              <div style="width:100%;height:100%;background:#22c55e;border-radius:999px;"></div>
+            </div>
+            <span style="font-size:0.8rem;color:#22c55e;width:36px;text-align:right;">100%</span>
+            <span style="color:#64748b;font-size:0.8rem;">0.21s</span>
+            <span id="arrow-TestDefectDetectionPerformance" style="color:#64748b;font-size:0.85rem;transition:transform .2s;">&#9660;</span>
+          </div>
+          <div id="TestDefectDetectionPerformance" style="display:none;border-top:1px solid #334155;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#0f172a;">
+                  <th style="padding:8px 12px;text-align:left;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Test</th>
+                  <th style="padding:8px 12px;text-align:center;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_single_frame_within_latency_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.157s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_average_over_ten_runs_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.034s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_latency_is_stable_across_runs</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.019s</td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="module-block" style="margin-bottom:16px;background:#1e293b;border-radius:12px;overflow:hidden;border:1px solid #334155;">
+          <div onclick="toggle('TestExportMetadataPerformance')"
+               style="display:flex;align-items:center;gap:14px;padding:14px 18px;
+                      cursor:pointer;user-select:none;background:#1e293b;transition:background .15s;"
+               onmouseover="this.style.background='#263348'"
+               onmouseout="this.style.background='#1e293b'">
+            <span style="font-size:1rem;color:#e2e8f0;flex:1;font-weight:600;">TestExportMetadataPerformance</span>
+            <span style="font-size:0.8rem;color:#94a3b8;">3 tests</span>
+            <span style="font-size:0.8rem;color:#22c55e;">pass 3</span>
+            
+            
+            <div style="width:72px;background:#334155;border-radius:999px;height:6px;overflow:hidden;">
+              <div style="width:100%;height:100%;background:#22c55e;border-radius:999px;"></div>
+            </div>
+            <span style="font-size:0.8rem;color:#22c55e;width:36px;text-align:right;">100%</span>
+            <span style="color:#64748b;font-size:0.8rem;">0.01s</span>
+            <span id="arrow-TestExportMetadataPerformance" style="color:#64748b;font-size:0.85rem;transition:transform .2s;">&#9660;</span>
+          </div>
+          <div id="TestExportMetadataPerformance" style="display:none;border-top:1px solid #334155;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#0f172a;">
+                  <th style="padding:8px 12px;text-align:left;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Test</th>
+                  <th style="padding:8px 12px;text-align:center;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_build_metadata_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.001s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_grade_derivation_1000_calls_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.001s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_full_defect_to_metadata_chain_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.005s</td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="module-block" style="margin-bottom:16px;background:#1e293b;border-radius:12px;overflow:hidden;border:1px solid #334155;">
+          <div onclick="toggle('TestMemoryFootprint')"
+               style="display:flex;align-items:center;gap:14px;padding:14px 18px;
+                      cursor:pointer;user-select:none;background:#1e293b;transition:background .15s;"
+               onmouseover="this.style.background='#263348'"
+               onmouseout="this.style.background='#1e293b'">
+            <span style="font-size:1rem;color:#e2e8f0;flex:1;font-weight:600;">TestMemoryFootprint</span>
+            <span style="font-size:0.8rem;color:#94a3b8;">2 tests</span>
+            <span style="font-size:0.8rem;color:#22c55e;">pass 2</span>
+            
+            
+            <div style="width:72px;background:#334155;border-radius:999px;height:6px;overflow:hidden;">
+              <div style="width:100%;height:100%;background:#22c55e;border-radius:999px;"></div>
+            </div>
+            <span style="font-size:0.8rem;color:#22c55e;width:36px;text-align:right;">100%</span>
+            <span style="color:#64748b;font-size:0.8rem;">0.01s</span>
+            <span id="arrow-TestMemoryFootprint" style="color:#64748b;font-size:0.85rem;transition:transform .2s;">&#9660;</span>
+          </div>
+          <div id="TestMemoryFootprint" style="display:none;border-top:1px solid #334155;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#0f172a;">
+                  <th style="padding:8px 12px;text-align:left;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Test</th>
+                  <th style="padding:8px 12px;text-align:center;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_defect_detector_memory_increase_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.007s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_faiss_index_memory_increase_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.003s</td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="module-block" style="margin-bottom:16px;background:#1e293b;border-radius:12px;overflow:hidden;border:1px solid #334155;">
+          <div onclick="toggle('TestRAGPipelinePerformance')"
+               style="display:flex;align-items:center;gap:14px;padding:14px 18px;
+                      cursor:pointer;user-select:none;background:#1e293b;transition:background .15s;"
+               onmouseover="this.style.background='#263348'"
+               onmouseout="this.style.background='#1e293b'">
+            <span style="font-size:1rem;color:#e2e8f0;flex:1;font-weight:600;">TestRAGPipelinePerformance</span>
+            <span style="font-size:0.8rem;color:#94a3b8;">5 tests</span>
+            <span style="font-size:0.8rem;color:#22c55e;">pass 5</span>
+            
+            
+            <div style="width:72px;background:#334155;border-radius:999px;height:6px;overflow:hidden;">
+              <div style="width:100%;height:100%;background:#22c55e;border-radius:999px;"></div>
+            </div>
+            <span style="font-size:0.8rem;color:#22c55e;width:36px;text-align:right;">100%</span>
+            <span style="color:#64748b;font-size:0.8rem;">0.17s</span>
+            <span id="arrow-TestRAGPipelinePerformance" style="color:#64748b;font-size:0.85rem;transition:transform .2s;">&#9660;</span>
+          </div>
+          <div id="TestRAGPipelinePerformance" style="display:none;border-top:1px solid #334155;">
+            <table style="width:100%;border-collapse:collapse;">
+              <thead>
+                <tr style="background:#0f172a;">
+                  <th style="padding:8px 12px;text-align:left;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Test</th>
+                  <th style="padding:8px 12px;text-align:center;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Status</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:0.72rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:.06em;">Time</th>
+                </tr>
+              </thead>
+              <tbody>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_faiss_vectorstore_build_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.167s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_faiss_single_query_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.002s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_context_formatting_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.002s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_chunking_seven_docs_within_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.001s</td>
+            </tr>
+            <tr class="test-row" data-status="PASSED">
+              <td style="padding:10px 12px;vertical-align:top;">
+                <span style="font-size:0.82rem;color:#e2e8f0;">test_end_to_end_rag_chain_within_combined_budget</span>
+                
+              </td>
+              <td style="padding:10px 12px;text-align:center;vertical-align:top;"><span style="background:#dcfce7;color:#22c55e;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:0.05em;">PASSED</span></td>
+              <td style="padding:10px 12px;text-align:right;vertical-align:top;color:#94a3b8;font-size:0.8rem;white-space:nowrap;">0.002s</td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+  </div>
+
+  <p style="text-align:center;color:#334155;font-size:0.78rem;margin-top:36px;">
+    ExportEdge AI FYP &mdash; generate_report.py
+  </p>
+
+</div>
+<script>
+  var moduleIds = ['TestDefectDetectionPerformance', 'TestExportMetadataPerformance', 'TestRAGPipelinePerformance', 'TestMemoryFootprint'];
+
+  function toggle(id) {
+    var el    = document.getElementById(id);
+    var arrow = document.getElementById('arrow-' + id);
+    var open  = el.style.display !== 'none';
+    el.style.display       = open ? 'none' : 'block';
+    arrow.style.transform  = open ? ''     : 'rotate(180deg)';
+  }
+
+  function expandAll() {
+    moduleIds.forEach(function(id) {
+      var safe  = id.replace(/\./g, '_').replace(/ /g, '_');
+      var el    = document.getElementById(safe);
+      var arrow = document.getElementById('arrow-' + safe);
+      if (el) { el.style.display = 'block'; arrow.style.transform = 'rotate(180deg)'; }
+    });
+  }
+
+  function collapseAll() {
+    moduleIds.forEach(function(id) {
+      var safe  = id.replace(/\./g, '_').replace(/ /g, '_');
+      var el    = document.getElementById(safe);
+      var arrow = document.getElementById('arrow-' + safe);
+      if (el) { el.style.display = 'none'; arrow.style.transform = ''; }
+    });
+  }
+
+  function filterModules(type, btn) {
+    document.querySelectorAll('#filter-bar .filter-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    document.querySelectorAll('.module-block').forEach(function(block) {
+      if (type === 'all') { block.style.display = ''; return; }
+      var rows     = block.querySelectorAll('tr.test-row');
+      var hasFail  = false;
+      var hasPass  = false;
+      rows.forEach(function(r) {
+        var s = r.getAttribute('data-status');
+        if (s === 'FAILED' || s === 'ERROR') hasFail = true;
+        if (s === 'PASSED') hasPass = true;
+      });
+      if (type === 'failed') block.style.display = hasFail ? '' : 'none';
+      if (type === 'passed') block.style.display = (hasPass && !hasFail) ? '' : 'none';
+    });
+  }
+</script>
+</body>
+</html>
